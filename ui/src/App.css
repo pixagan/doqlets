@@ -35,6 +35,7 @@
   margin:'0px';
   padding:'0px';
   border-bottom:'solid';
+ 
 }
 
 main {
@@ -44,6 +45,49 @@ main {
 }
 
 
+.dashbody {
+  display: flex;
+  background-color: "white";
+  padding-top: -10px;
+  margin-top: -10px;
+}
+
+.sidenav {
+  width: 25vw;
+  height: 95vh;
+  border-style: None;
+  
+  overflow: scroll;
+  background-color: white;
+}
+
+.content {
+  border-style: None;
+  width: 75vw;
+  overflow: scroll;
+  background-color: white;
+}
+
+
+.button_gen {
+  background-color:#61dafb;
+}
+
+.button_toolbar {
+  background-color:#b861fb;
+}
+
+.button_2 {
+  background-color:#771e16;
+}
+
+
+.tablestyle {
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 1px solid #ddd;
+  overflow-x:auto;
+}
 
 th, td {
   text-align: left;

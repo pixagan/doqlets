@@ -1,14 +1,10 @@
 {
   "name": "doqlets_ui",
-  "proxy": "http://localhost:6031",
+  "proxy": "http://localhost:6070",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.8",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@xyflow/react": "^12.10.0",
     "axios": "^1.7.7",
     "katex": "^0.16.11",
     "lucide-react": "^0.562.0",
@@ -62,3 +58,4 @@
     "tailwindcss": "^4.1.7"
   }
 }
+

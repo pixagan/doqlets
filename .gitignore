@@ -6,8 +6,6 @@
 /ui/package-lock.json
 /nodes/.env
 /doqlets/.env
-/doqlets/nodes
-/doqlets/DocChat.py
 
 # macOS
 .DS_Store
