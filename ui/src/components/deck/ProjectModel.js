@@ -18,71 +18,56 @@ import {Alert} from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badge } from 'react-bootstrap'
 import axios from 'axios'
-import ContentCard from '../cards/ContentCard'
 
-const PageView = ({ page_id, page_title }) => {
+const ProjectModel = ({ project_id }) => {
 
     const dispatch = useDispatch()
 
 
-    const [pageTitle, setPageTitle] = useState('Page')
-    const [pageModel, setPageModel] = useState({})
-    const [cards, setCards] = useState([])
-
-    const [viewMode, setViewMode] = useState('wiki') // wiki, pagemodel
+    const [projectModel, setProjectModel] = useState({})
 
 
-    const loadPageCards = async (page_id) => {
+    const loadProjectModel = async (page_id) => {
         var config = {
             headers: {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.get(`/api/wiki/pages/${page_id}`, config)
+        const response = await axios.get(`/api/pages/${page_id}`, config)
         console.log("response ", response.data)
-        setCards(response.data.cards)
-        setPageModel(response.data.page_model)
+        setProjectModel(response.data.project_model)
     }
     
 
 
     useEffect(() => {
 
-        console.log("cards ", cards)
-        if (page_id != null) {
-            loadPageCards(page_id)
-        }
-    }, [page_id])
+      
+        
+    }, [])
 
     return (
 
         <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None'}}>
 
 
-            {page_id == null && (
-                <p className='h4'>Select a page from the Menu on the left</p>
-            )}
+            <p className='h4'>Project Description</p>
 
-            <ListGroup horizontal>
-                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}}>View</ListGroup.Item>
-                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}}>Config</ListGroup.Item>
-            </ListGroup>
-
-             <p className='h4'>{pageModel && pageModel.title}</p>
-
-             <br />
+            <hr />
 
 
-            {cards.map((card, index)=>(
-                <ContentCard page_id={page_id} card={card} />
-            
-            ))}
-               
-                
+            <p className='h4'>Page Creation Strategy</p>
+
+            <hr />
+   
+
+           <p className='h4'>Page Sections Requirements</p>
+
+           #how to break the page into sections
+
 
                 
         </div>
-
 
 
     )
@@ -90,4 +75,4 @@ const PageView = ({ page_id, page_title }) => {
 
 
 
-export default PageView
+export default ProjectModel

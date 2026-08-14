@@ -21,44 +21,54 @@ km = KeyManager()
 
 db = Mongo("DoqletsDB", config={"MONGO_URI": km["MONGO_URI"], "MONGO_DB": km["MONGO_DB"]})
 
-# docs = ["""Neural networks learn by adjusting their weights to minimize prediction errors. Algorithms such as backpropagation compute how much each weight contributes to the overall error and update the weights accordingly. Through many iterations over the training data, the network gradually improves its performance on the target task.
-# """,
-# """Neurons in a neural network play different roles depending on their location. Input neurons receive raw data, such as pixel values in an image or words in a sentence. Hidden neurons, located in one or more intermediate layers, perform most of the computation by extracting increasingly abstract features from the input. Output neurons produce the final prediction, such as an object label in an image, a translated sentence, or the next word in a paragraph. Although all neurons use similar mathematical operations, their role depends on their position and the information they process.
-# """
-# ]
+# # docs = ["""Neural networks learn by adjusting their weights to minimize prediction errors. Algorithms such as backpropagation compute how much each weight contributes to the overall error and update the weights accordingly. Through many iterations over the training data, the network gradually improves its performance on the target task.
+# # """,
+# # """Neurons in a neural network play different roles depending on their location. Input neurons receive raw data, such as pixel values in an image or words in a sentence. Hidden neurons, located in one or more intermediate layers, perform most of the computation by extracting increasingly abstract features from the input. Output neurons produce the final prediction, such as an object label in an image, a translated sentence, or the next word in a paragraph. Although all neurons use similar mathematical operations, their role depends on their position and the information they process.
+# # """
+# # ]
 
-# metadata = [
-#     {
-#         "title": "Neural networks",
-#     },
-#     {
-#         "title": "Neurons in a neural network",
-#     }
-# ]
+# # metadata = [
+# #     {
+# #         "title": "Neural networks",
+# #     },
+# #     {
+# #         "title": "Neurons in a neural network",
+# #     }
+# # ]
 
-cards = db.load_documents("cards", {})
-docs = []
-metadata = []
-for card in cards:
-    docs.append(card["content"])
-    metadata.append({
-        "uid": card["uid"],
-        "title": card["title"],
-    })
-
-
-
-chroma_db = ChromaNode("ChromaDB", config={"db_path": km["CHROMA_PATH"]})
-
-collection_name = "doqlets" #"test_collection"
-#collection = chroma_db.create_get_collection(collection_name)
+# cards = db.load_documents("cards", {})
+# docs = []
+# metadata = []
+# for card in cards:
+#     docs.append(card["content"])
+#     metadata.append({
+#         "uid": card["uid"],
+#         "title": card["title"],
+#     })
 
 
-chroma_db.add_documents(collection_name, docs, metadata)
+
+# chroma_db = ChromaNode("ChromaDB", config={"db_path": km["CHROMA_PATH"]})
+
+# collection_name = "doqlets" #"test_collection"
+# #collection = chroma_db.create_get_collection(collection_name)
 
 
-matches = chroma_db.search(collection_name, "Large Language Models")
-print(matches)
+# chroma_db.add_documents(collection_name, docs, metadata)
+
+
+# matches = chroma_db.search(collection_name, "Large Language Models")
+# print(matches)
 
 #ids = ["5300bfcb-d8e1-4115-b546-3df1b9018b3b", "7b3ba74b-7561-4c1b-9795-073ce545a749"]
 #chroma_db.delete_documents(collection_name, ids)
+
+
+
+#------------- Create Project Model------------
+
+newProject = db.create_document("projects", {
+    "name": "AI knowledge",
+    "description": "Focus on information about AI models focussing on Machine Learning and Deep Learning Models.",
+    "project_model":{}
+})

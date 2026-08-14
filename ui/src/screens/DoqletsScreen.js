@@ -31,16 +31,14 @@ import {
   import { useNavigate } from 'react-router-dom';
 
   import PageView from '../components/deck/PageView'
-  import WikiView from '../components/deck/WikiView'
   import DataView from '../components/deck/DataView'
   import AddData from '../components/deck/AddData'
   import ChatCard from '../components/deck/ChatCard'
   import SearchCard from '../components/deck/SearchCard'
   import AgentCard from '../components/deck/AgentCard'
   import ProjectModel from '../components/deck/ProjectModel'
-  import DocView from '../components/deck/DocView'
   
-export const WikiScreen = ({match, history}) => {
+export const DoqletsScreen = ({match, history}) => {
 
     const dispatch = useDispatch()
 
@@ -51,24 +49,24 @@ export const WikiScreen = ({match, history}) => {
     const [sectionType, setSectionType] = useState("all") 
     const [documents, setDocuments] = useState([])
 
-    const [rightView, setRightView] = useState("agents") // chat, add, view
+    const [rightView, setRightView] = useState("pages") // chat, add, view
     const [query, setQuery] = useState('')
     const [chatHistory, setChatHistory] = useState([])
     const [docPages, setDocPages] = useState([])
 
     const [project_id, setProjectId] = useState(null)
-    const [doc_id, setDocId] = useState(null)
+    const [page_id, setPageId] = useState(null)
     const [selectedPage, setSelectedPage] = useState(null)
 
     const [cards, setCards] = useState([])
 
-    const [docs, setDocs] = useState([])
+    const [pages, setPages] = useState([])
 
 
     const [chatView, setChatView] = useState("chat") //search, chat
 
     
-    const addDoc = async () => {
+    const addPage = async () => {
         var config = {
             headers: {
                 'Content-Type': 'application/json'
@@ -76,19 +74,19 @@ export const WikiScreen = ({match, history}) => {
         }
         const response = await axios.post('/api/pages', { title: pageTitle }, config)
         console.log("response ", response)
-        setDocs([...docs, response.data.page])
+        setPages([...pages, response.data.page])
     }
 
 
-    const loadDocs = async () => {
+    const loadPages = async () => {
         var config = {
             headers: {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.get(`/api/documents`, config)
+        const response = await axios.get(`/api/pages`, config)
         console.log("response ", response)
-        setDocs(response.data.documents)
+        setPages(response.data.pages)
     }
 
 
@@ -96,9 +94,10 @@ export const WikiScreen = ({match, history}) => {
 
 
     const selectPage = async (page_id, page_title) => {
-        setDocId(page_id)
-        setSelectedPage({_id:page_id, title:page_title})
-        setRightView("docs")
+        setPageId(page_id)
+        //setPageTitle(page_title)
+        setSelectedPage(page_id)
+        setRightView("pages")
 
         //loadPageCards(page_id)
     }
@@ -106,7 +105,7 @@ export const WikiScreen = ({match, history}) => {
 
     useEffect(() => {
         
-        loadDocs()
+        loadPages()
 
     }, [])
 
@@ -120,20 +119,22 @@ export const WikiScreen = ({match, history}) => {
          <Row>
             <Col xs={2} style={{maxHeight: '95vh', overflow: 'scroll'}}>
 
+             {/* <p className='h4'>Project View</p> */}
+             {/* <DataView project_id={project_id} /> */}
 
               <ListGroup>
                 <ListGroup.Item style={{padding:'1px'}}>
                     <InputGroup>
-                    <Form.Control type="text" placeholder="Enter doc title" value={pageTitle} onChange={(e)=>setPageTitle(e.target.value)} />
-                    <Badge onClick={()=>addDoc()}>+</Badge>
+                    <Form.Control type="text" placeholder="Enter page title" value={pageTitle} onChange={(e)=>setPageTitle(e.target.value)} />
+                    <Badge onClick={()=>addPage()}>+</Badge>
                     </InputGroup>
                 </ListGroup.Item>
 
-                {docs && docs.map((doc, index)=>(
-                    <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold'}} onClick={()=>selectPage(doc._id, doc.title)} active={doc_id === doc._id}>
-                    {doc.title}
-                    </ListGroup.Item>
-                ))}
+              {pages && pages.map((page, index)=>(
+                <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold'}} onClick={()=>selectPage(page.uid, page.title)} active={page_id === page.uid}>
+                {page.title}
+                </ListGroup.Item>
+             ))}
                 
               </ListGroup>
              
@@ -144,8 +145,8 @@ export const WikiScreen = ({match, history}) => {
             <Col style={{ maxHeight: '95vh', overflow: 'scroll'}}>
 
             <ListGroup horizontal>
-                <ListGroup.Item onClick={()=>setRightView("docs")} active={rightView === "docs"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Docs
+                <ListGroup.Item onClick={()=>setRightView("pages")} active={rightView === "pages"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
+                    Wiki
                 </ListGroup.Item>
                 <ListGroup.Item onClick={()=>setRightView("add")} active={rightView === "add"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Add Data
@@ -156,9 +157,6 @@ export const WikiScreen = ({match, history}) => {
                 <ListGroup.Item onClick={()=>setRightView("agents")} active={rightView === "agents"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Agents
                 </ListGroup.Item>
-                <ListGroup.Item onClick={()=>setRightView("wiki")} active={rightView === "pages"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Wiki
-                </ListGroup.Item>
                 <ListGroup.Item onClick={()=>setRightView("config")} active={rightView === "config"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Project Config
                 </ListGroup.Item>
@@ -167,10 +165,9 @@ export const WikiScreen = ({match, history}) => {
             <br />
 
 
-            {rightView === "wiki" && (
+            {rightView === "pages" && (
                 <div>
-                    <WikiView project_id={project_id} />
-                     {/* <PageView project_id={project_id} page_id={page_id} page_title={pageTitle} /> */}
+                     <PageView project_id={project_id} page_id={page_id} page_title={pageTitle} />
 
                 </div>
             )}
@@ -222,13 +219,6 @@ export const WikiScreen = ({match, history}) => {
             )}
 
 
-            {rightView === "docs" && (
-                <div>
-                    <DocView project_id={project_id} doc_id={doc_id} />
-                </div>
-            )}
-
-
 
             
             
@@ -241,4 +231,4 @@ export const WikiScreen = ({match, history}) => {
     )
 }
 
-export default WikiScreen
+export default DoqletsScreen

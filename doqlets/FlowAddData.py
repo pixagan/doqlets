@@ -67,6 +67,7 @@ def data_to_cards(data):
                     "card_type":"text",
                     "title":"The header of the card",
                     "uid":"title with spaces replaced with underscores and specical character if any removed in lower case",
+                    "card_topic":"What the card is about. This helps figure out which page the card should be added to and where to add new data."
                     "content":"The content of the card",
                 },
                 {
@@ -74,6 +75,7 @@ def data_to_cards(data):
                     "title":"The header of the card",
                     "uid":"title with spaces replaced with underscores and specical character if any removed in lower case ",
                     "content":"A description of the image",
+                    "card_topic":"What the card is about",
                     "image_url":"The url of the image"
                 },
                 {
@@ -81,6 +83,7 @@ def data_to_cards(data):
                     "title":"The header of the card",
                     "uid":"title with spaces replaced with underscores and specical character if any removed in lower case",
                     "content":"A description of the table",
+                    "card_topic":"What the card is about",
                     "data":"the data of the table in csv format"
                 }
             ]}

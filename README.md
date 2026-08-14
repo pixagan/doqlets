@@ -12,18 +12,24 @@ See the [NOTICE](NOTICE) file for attribution requirements.
 
 ## Installing Doqlets
 
-# Install Backend
+### Install Backend
 Navigate to the doqlets folder
 pip install -e .
 
-# Install Frontend
+### Install Frontend
 
-## Dependencies
-Laeyerz  - Workflow and Agents
-Open AI LLM
-Chroma DB
-Mongo DB
+#### Dependencies
+- Laeyerz  - Workflow and Agents
+- Open AI LLM
+- Chroma DB
+- Mongo DB
 
 
 navigate to the ui folder
 npm start
+
+
+## Adding Data to Wiki
+Use the Add data tab to add text data
+
+##

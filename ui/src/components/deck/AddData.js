@@ -30,6 +30,8 @@ const AddData = ({ project_id }) => {
     const [selectedType, setSelectedType] = useState('text')
 
 
+    const [title, setTitle] = useState('')
+
     const [text, setText] = useState('')
 
 
@@ -42,7 +44,7 @@ const AddData = ({ project_id }) => {
 
     const uploadText = async () => {
         if (!text) return
-        const response = await axios.post('/api/store/text', {data:text})
+        const response = await axios.post('/api/documents/text', {title:title, data:text})
         console.log("response ", response.data)
     }
 
@@ -55,7 +57,7 @@ const AddData = ({ project_id }) => {
         const formData = new FormData()
         formData.append('file', selectedFile)   // must be 'file' to match backend
 
-        const response = await axios.post('/api/store', formData)
+        const response = await axios.post('/api/documents/file', formData)
 
         if(response.status === 200){
             const responseD = await axios.get('/api/document')
@@ -97,6 +99,7 @@ const AddData = ({ project_id }) => {
             {selectedType === 'text' && (
                 <div>
                     
+                    <Form.Control type="text" placeholder="Enter title" value={title} onChange={(e) => setTitle(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
                     <Form.Control as="textarea" rows={20} placeholder="Enter text" value={text} onChange={(e) => setText(e.target.value)} onInput={resizeTextarea} ref={textareaRef}/>
                     <Button variant="primary" onClick={()=>uploadText()}>Upload</Button>
                 </div>

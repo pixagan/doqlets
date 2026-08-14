@@ -33,7 +33,8 @@ setup(
         "pymongo",
         "bson",
         "datetime",
-        "openai"
+        "openai",
+        "fitz"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

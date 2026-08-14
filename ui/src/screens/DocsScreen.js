@@ -31,7 +31,7 @@ import {
   import { useNavigate } from 'react-router-dom';
 
   
-export const ProjectsScreen = ({match, history}) => {
+export const DocsScreen = ({match, history}) => {
 
    
     const dispatch = useDispatch()
@@ -42,36 +42,12 @@ export const ProjectsScreen = ({match, history}) => {
     const [projectName, setProjectName] = useState('')
    
  
-
-    const addProject = async () => {
-
-        var config={
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-        const response = await axios.post('/api/projects', { projectName: projectName }, config)
-        
-        const added_project = response.data.project
-
-        setProjects([added_project, ...projects])
-    }
-
-
-
-    const loadProjects = async () => {
-        const response = await axios.get('/api/projects')
-        const projects = response.data.projects
-        console.log("projects ", projects)
-        setProjects(projects)
-    }
-
     
 
 
     useEffect(() => {
         
-        loadProjects()
+      
 
     }, [])
 
@@ -81,27 +57,20 @@ export const ProjectsScreen = ({match, history}) => {
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', textAlign: 'center', margin:'0px' }}>
 
 
-            <Container>
-            <InputGroup>
-                <Form.Control type="text" placeholder="Add a Project" value={projectName} onChange={(e)=>setProjectName(e.target.value)} className="mb-2"/>
-                <Button variant="primary" onClick={()=>addProject()}>Add</Button>
-            </InputGroup>
+         <section>
+            <p>RAG is one of the most powerful AI applications</p>
+         </section>
 
-            <hr />
-
-            {projects.map((project, index)=>(
-                <div key={index} style={{borderBottom: '1px solid #dee2e6'}}>
-                    <p className='text-left h4'>{project.name}</p>
-                </div>
-            ))}
-
-            </Container>
-           
+         <section>
+            <p>Pick your architecture and connectors and deploy without coding</p>
+         </section>
 
 
+
+         
            
         </div>
     )
 }
 
-export default ProjectsScreen
+export default DocsScreen

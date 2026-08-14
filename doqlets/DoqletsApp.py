@@ -55,6 +55,7 @@ class ChatInput(BaseModel):
     query: str
 
 class DataInput(BaseModel):
+    title: str
     data: str
 
 class PageCreate(BaseModel):
@@ -124,46 +125,104 @@ class DoqletsApp:
             return {"message": "Welcome to Doqlets API"}
 
 
-        @self.api.get("/api/pages")
-        async def load_pages():
+        @self.api.get("/api/projects")
+        async def load_projects():
 
-            pages = self.db.load_documents("pages", {})
-            for page in pages:
-                page["_id"] = str(page["_id"])
-            return {"pages": pages}
-
-
-        @self.api.post("/api/pages")
-        async def add_page(page_create:PageCreate):
-
-            title = page_create.title
-
-            uid = title.strip().replace(" ", "_").lower()
-
-            created_page = self.db.create_document("pages", {"title": title})
+            projects = self.db.load_documents("projects", {})
+            for project in projects:
+                project["_id"] = str(project["_id"])
+            return {"projects": projects}
 
 
-            new_page = {
-                "_id": str(created_page.inserted_id),
+
+
+
+        @self.api.get("/api/documents")
+        async def load_documents():
+
+            documents = self.db.load_documents("documents", {})
+            for document in documents:
+                document["_id"] = str(document["_id"])
+            return {"documents": documents}
+
+
+
+        @self.api.get("/api/documents/{doc_id}")
+        async def load_document(doc_id: str):
+
+            doc      = self.db.load_document_id("documents", doc_id)
+
+            print("doc ", doc)
+
+            document = self.db.load_document_id("document_data", doc["doc_id"])
+            
+            print("document ", document)
+
+            document["_id"] = str(document["_id"])
+
+            return {"document": document}
+
+
+        @self.api.post("/api/documents/text")
+        async def add_data(data_in:DataInput):
+
+            data  = data_in.data
+            title = data_in.title
+
+            doc = {
                 "title": title,
-                "uid": uid
+                "data": data,
             }
 
-            self.action_log.add_item("add_page", "Adding page to database", {"title": title})
-
-            return {"page": new_page}
+            created_document = self.db.create_document("document_data", doc)
 
 
-        @self.api.get("/api/pages/{page_uid}")
-        async def load_page(page_uid: str):
-            cards = self.db.load_documents("cards", {"page":page_uid})
-            for card in cards:  
-                card["_id"] = str(card["_id"])
-            return {"cards": cards}
+            new_document = {
+                "project_id":"",
+                "title": title,
+                "source": "db",   #db, file, cloud, web.
+                "doc_id": str(created_document.inserted_id),
+            }
+
+
+            created_doc = self.db.create_document("documents", new_document)
 
 
 
-        @self.api.post("/api/store/text")
+            return_doc = {
+                "project_id":"",
+                "title": title,
+                "source": "db",   #db, file, cloud, web.
+                "doc_id": str(created_document.inserted_id),
+            }
+
+
+            # flow_response = self.d2c_flow.run({"data": data})
+
+            # cards = flow_response["outputs"]["MergeCardsToTags|merge_cards_to_tags|merged_cards"]
+
+            # card_ids = [card["_id"] for card in cards]
+
+            # self.action_log.add_item("adding_data", "Adding data as text directly to database", {"card_ids": card_ids})
+
+            return {"document": return_doc}
+
+
+        @self.api.post("/api/documents/file")
+        async def store_pdf(file: UploadFile = File(...)):
+
+            file_content = await file.read()
+            self.store_flow.run({"file": file_content})
+            
+            return {"message": "PDF stored successfully"}
+        
+
+
+
+
+
+
+        @self.api.post("/api/wiki/store/text")
         async def add_data(data_in:DataInput):
 
             data = data_in.data
@@ -179,13 +238,52 @@ class DoqletsApp:
             return {"cards": merged_cards}
 
 
-        @self.api.post("/api/store/file")
-        async def store_pdf(file: UploadFile = File(...)):
 
-            file_content = await file.read()
-            self.store_flow.run({"file": file_content})
-            
-            return {"message": "PDF stored successfully"}
+        @self.api.get("/api/wiki/pages")
+        async def load_pages():
+
+            pages = self.db.load_documents("pages", {})
+            for page in pages:
+                page["_id"] = str(page["_id"])
+            return {"pages": pages}
+
+
+        @self.api.post("/api/wiki/pages")
+        async def add_page(page_create:PageCreate):
+
+            title = page_create.title
+
+            uid = title.strip().replace(" ", "_").lower()
+
+            created_page = self.db.create_document("pages", {"title": title})
+
+
+            new_page = {
+                "_id": str(created_page.inserted_id),
+                "title": title,
+                "page_description": page_description,
+                "uid": uid
+            }
+
+            self.action_log.add_item("add_page", "Adding page to database", {"title": title})
+
+            return {"page": new_page}
+
+
+        @self.api.get("/api/wiki/pages/{page_uid}")
+        async def load_page(page_uid: str):
+            cards = self.db.load_documents("cards", {"page":page_uid})
+            for card in cards:  
+                card["_id"] = str(card["_id"])
+
+
+            page_model = self.db.load_document("pages", {"uid":page_uid})
+            page_model["_id"] = str(page_model["_id"])
+            return {"cards": cards, "page_model": page_model}
+
+
+
+
 
 
 
