@@ -17,16 +17,37 @@ from laeyerz.flow.Flow import Flow
 from laeyerz.flow.Node import Node
 from laeyerz.utils.KeyManager import KeyManager
 
-from dataloaders.PdfLoader import PdfLoader
+from nodes.PdfLoader import PdfLoader
+from nodes.TextProcessor import TextProcessorNode
 
 
+pdf_loader = PdfLoader("PdfLoader")
 
-def load_pdf(file_path):
-    
-    pdf_loader = PdfLoader()
-    pdf_loader.load(file_path)
+#Combine text into a single string
+combine_text  = TextProcessorNode("CombinePages")
 
-    return pdf_loader.get_text()
+#Split Text
+split_text     = TextProcessorNode("SplitText")
 
 
-    
+ #-----Creating thh Flow
+fileloader_flow = Flow("FileLoaderFlow")
+
+#-----adding nodes
+fileloader_flow.add_node(pdf_loader)
+fileloader_flow.add_node(combine_text)
+fileloader_flow.add_node(split_text)
+
+#-----adding edges
+fileloader_flow.add_edge("START", "PdfLoader|extract_pdf_text")
+fileloader_flow.add_edge("PdfLoader|extract_pdf_text", "CombinePages|combine_pages")
+fileloader_flow.add_edge("CombinePages|combine_pages", "SplitText|split_text")
+fileloader_flow.add_edge("SplitText|split_text", "END")
+
+
+#---adding data sources
+fileloader_flow.add_data_source("PdfLoader|extract_pdf_text|loaded_file", "INPUTS|file")
+fileloader_flow.add_data_source("CombinePages|combine_pages|pages", "PdfLoader|extract_pdf_text|doc_pages")
+fileloader_flow.add_data_source("SplitText|split_text|text", "CombinePages|combine_pages|text")
+
+fileloader_flow.finalize()

@@ -51,19 +51,49 @@ const ProjectModel = ({ project_id }) => {
         <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None'}}>
 
 
-            <p className='h4'>Project Description</p>
+            <p className='h4'>Project Configuration</p>
 
             <hr />
 
-
-            <p className='h4'>Page Creation Strategy</p>
+            <p className='h4'> LLMs</p>
 
             <hr />
-   
 
-           <p className='h4'>Page Sections Requirements</p>
+            <p className='h4'>Doc Loader</p>
+
+
+            <p>Chunking Model</p>
+
+
+            <p>Vector Store</p>
+
+
+            <p>Embedding Model</p>
+
+
+            <p>Knowledge Graph</p>
+
+
+            <p>Keyword Search</p>
+
+            <hr />
+
+           <p className='h4'>Chat Config</p>
 
            #how to break the page into sections
+
+           <hr />
+
+           <p className='h4'>Agent Config</p>
+
+           #how to break the page into sections
+
+           <hr />
+
+
+           <p className='h4'>Setup Wiki</p>
+
+           <hr />
 
 
                 

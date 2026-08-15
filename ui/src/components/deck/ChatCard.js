@@ -20,6 +20,7 @@ import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badg
 import axios from 'axios'
 
 
+
 const ChatCard = ({ project_id }) => {
 
     const dispatch = useDispatch()
@@ -51,7 +52,7 @@ const ChatCard = ({ project_id }) => {
         //console.log("query ", query)
         console.log("answer ", answer)
 
-        setChatHistory([{ query: query, response: answer }, ...chatHistory])
+        setChatHistory([{ query: query, answer: answer }, ...chatHistory])
 
     }
 
@@ -99,7 +100,7 @@ const ChatCard = ({ project_id }) => {
                    
                    <Card.Body style={{maxHeight:'40vh', overflow:'scroll'}}>
                     <p className='text-left'>{item.answer && item.answer.toString()}</p>
-                  
+                    {/* <MarkdownView content={item.answer} /> */}
                    </Card.Body>
                     
                 </Card>

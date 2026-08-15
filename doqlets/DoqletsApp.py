@@ -48,6 +48,8 @@ from ActionLog import ActionLog
 from FlowAddData import dataToCardsFlow
 from FlowSearch import searchFlow
 from FlowChat import chatFlow
+from FileLoaderFlow import fileloader_flow
+from DocumentLoaderFlow import docloader_flow
 from DoqletsAgentManager import DoqletsAgentManager
 
 
@@ -100,6 +102,7 @@ class DoqletsApp:
         self.d2c_flow    = dataToCardsFlow
         self.search_flow = searchFlow
         self.chat_flow   = chatFlow
+        self.doc_loader_flow = docloader_flow
 
         self.action_log = ActionLog()
         self.agent_manager = DoqletsAgentManager()
@@ -158,6 +161,8 @@ class DoqletsApp:
             
             print("document ", document)
 
+            
+
             document["_id"] = str(document["_id"])
 
             return {"document": document}
@@ -187,6 +192,8 @@ class DoqletsApp:
 
             created_doc = self.db.create_document("documents", new_document)
 
+
+            flow_response = self.doc_loader_flow.run({"data": data})
 
 
             return_doc = {
