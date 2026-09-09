@@ -18,7 +18,7 @@ import {Alert} from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badge } from 'react-bootstrap'
 import axios from 'axios'
-
+import { MarkdownView } from '../cards/MarkdownView'
 
 
 const ChatCard = ({ project_id }) => {
@@ -99,8 +99,8 @@ const ChatCard = ({ project_id }) => {
                     </Card.Header>
                    
                    <Card.Body style={{maxHeight:'40vh', overflow:'scroll'}}>
-                    <p className='text-left'>{item.answer && item.answer.toString()}</p>
-                    {/* <MarkdownView content={item.answer} /> */}
+                    {/* <p className='text-left'>{item.answer && item.answer.toString()}</p> */}
+                    <MarkdownView content={item.answer} />
                    </Card.Body>
                     
                 </Card>

@@ -66,6 +66,10 @@ export const ProjectsScreen = ({match, history}) => {
         setProjects(projects)
     }
 
+    const navigateToProject = (projectId) => {
+        navigate(`/doqlets/${projectId}`)
+    }
+
     
 
 
@@ -90,7 +94,7 @@ export const ProjectsScreen = ({match, history}) => {
             <hr />
 
             {projects.map((project, index)=>(
-                <div key={index} style={{borderBottom: '1px solid #dee2e6'}}>
+                <div key={index} style={{borderBottom: '1px solid #dee2e6'}} onClick={()=>navigateToProject(project._id)}>
                     <p className='text-left h4'>{project.name}</p>
                 </div>
             ))}

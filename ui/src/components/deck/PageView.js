@@ -60,13 +60,17 @@ const PageView = ({ page_id, page_title }) => {
 
 
             {page_id == null && (
-                <p className='h4'>Select a page from the Menu on the left</p>
+                <>
+                 <p className='h4'>Select a page from the Menu on the left</p>
+                 <p className='h4'>To add data, click the Docs Tab and use the Add Data Form.</p>
+                </>
+               
             )}
 
-            <ListGroup horizontal>
+            {/* <ListGroup horizontal>
                 <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}}>View</ListGroup.Item>
                 <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}}>Config</ListGroup.Item>
-            </ListGroup>
+            </ListGroup> */}
 
              <p className='h4'>{pageModel && pageModel.title}</p>
 

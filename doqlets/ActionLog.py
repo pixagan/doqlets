@@ -56,7 +56,7 @@ class ActionLog:
         new_chat = self.db.create_document("chat", new_chat)
 
         self.add_item("chat", "Chat with the agent", {"chat_id": str(new_chat.inserted_id)})
-
+        return new_chat.inserted_id
 
 
     def add_task_item(self, task, skill, agent_response): 
@@ -64,10 +64,13 @@ class ActionLog:
         new_task = {
             "task": task,
             "skill": skill,
-            "agent_response": agent_response,
+            "response": agent_response["output"],
+            "keypoints": agent_response["task_keypoints"],
         } 
 
         new_task = self.db.create_document("task", new_task)
 
         self.add_item("task", "Task run with Agent", {"task_id": str(new_task.inserted_id), "skill": skill})
+
+        return new_task.inserted_id
 

@@ -18,10 +18,9 @@ import {Alert} from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badge } from 'react-bootstrap'
 import axios from 'axios'
-import TaskView from './TaskView'
 
 
-const AgentCard = ({ project_id }) => {
+const AddFiles = ({ project_id }) => {
 
     const dispatch = useDispatch()
 
@@ -72,7 +71,7 @@ const AgentCard = ({ project_id }) => {
 
         console.log("response ", answer.toString())
 
-        setChatHistory([answer, ...chatHistory])
+        setChatHistory([{ query: query, response: answer }, ...chatHistory])
 
     }
 
@@ -101,35 +100,31 @@ const AgentCard = ({ project_id }) => {
                    
 
             <p className='h4'>
-                <span style={{marginRight:'10px'}}>Agents</span>
+                <span style={{marginRight:'10px'}}>Tasks</span>
             </p>
             
 
            
             <hr />
-
-
             <InputGroup>
-              <Form.Select aria-label="Default select example" value={selectedSkill} onChange={(e)=>setSelectedSkill(e.target.value)}>
-                <option value="">Select a skill</option>
-                {skillList.map((skill, index)=>(
-                  <option key={index} value={skill.name}>{skill.name}</option>
-                ))}
-              </Form.Select>
-              <Button variant="primary" onClick={()=>chatRequest()} style={{textAlign:'left'}}>Run</Button>
-            </InputGroup>
+            
+            <Form.Select aria-label="Default select example" value={selectedSkill} onChange={(e)=>setSelectedSkill(e.target.value)}>
+              <option value="">Select an Agent</option>
+              {skillList.map((skill, index)=>(
+                <option key={index} value={skill.name}>{skill.name}</option>
+              ))}
+            </Form.Select>
+            <Button variant="primary" onClick={()=>chatRequest()} style={{textAlign:'left'}}>Run</Button>
+          </InputGroup>
 
-            <br />
+            <Form.Control as="textarea" rows={5} placeholder="Task Data" value={query} onChange={(e)=>setQuery(e.target.value)} className="mb-2"/>
+            
+
+            <hr />
+
+            <p className='h5'>Add Documents/Files</p>
            
-            <Form.Control as="textarea" rows={5} placeholder="Enter your query" value={query} onChange={(e)=>setQuery(e.target.value)} className="mb-2"/>
-                
-            
-            
-            
-                
-            {chatHistory.map((item, index)=>(
-                <TaskView key={index} task_card={item} />
-            ))}
+            <hr />
 
 
                 </div>
@@ -145,4 +140,4 @@ const AgentCard = ({ project_id }) => {
 
 
 
-export default AgentCard
+export default AddFiles

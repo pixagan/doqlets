@@ -12,14 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from nodes.PdfLoader import PdfLoader
+from nodes.TextProcessor import TextProcessorNode
 
-class DataGraph:
+class DataLoader:
     def __init__(self):
-        self.nodes = []
-        self.edges = []
+        self.hello = ""
 
-    def add_node(self, node):
-        self.nodes.append(node)
+    def load_text(self, data):
+        pass
 
-    def add_edge(self, edge):
-        self.edges.append(edge)
+    def load_pdf(self, data):
+        pdf_load  = PdfLoader("PdfLoader")
+        doc_pages = pdf_load.extract_pdf_text(data)
+
+        print("doc_pages ", doc_pages)
+
+        text_processor = TextProcessorNode("TextProcessor")
+        processed_text = text_processor.combine_pages(doc_pages['doc_pages'])
+
+        return processed_text["text"]

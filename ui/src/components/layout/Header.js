@@ -14,7 +14,9 @@
 
 import React, { useEffect } from 'react' 
 import {  useNavigate} from 'react-router-dom'
-import {Navbar, Nav } from 'react-bootstrap'
+import {Navbar, Nav, Button} from 'react-bootstrap'
+import { LinkContainer } from 'react-router-bootstrap'
+import { Image } from 'react-bootstrap'
 
 const Header = () => {
 
@@ -35,7 +37,14 @@ const Header = () => {
 
             <Navbar expand="lg" collapseOnSelect style={{padding:'0px', borderColor:'#b861fb', marginTop:'0px', marginBottom:'0px', marginLeft:'10px'}}>
                 
-                <Navbar.Brand href="/">Doqlets</Navbar.Brand>
+                <Navbar.Brand href="/">
+                <Image src="/doqlets.png" alt="Doqlets" style={{width:'30px', height:'30px'}} /> Doqlets</Navbar.Brand>
+
+                
+
+                 
+
+
         </Navbar>
 
         </header>

@@ -29,10 +29,6 @@ from Skilllist import skillist
 
 km = KeyManager()
 
-llm_config={
-    "api_key":km['OPENAI_API_KEY'], 
-    "model":"gpt-5.1"
-}
 
 class DoqletsAgentManager:
     def __init__(self):
@@ -53,7 +49,16 @@ class DoqletsAgentManager:
         data_instruction = """You must only use the data available in the databases for the task.
         You can use the tools provided to search and retrueve data. DO NOT MAKE UP ANY INFOMRATION.
         """
+
+        response_format = """Respond in Markdown format unless otherwise specified by the user."""
+        
         agent_instructions = agent_instructions + data_instruction
+
+        llm_config={
+            "api_key":km['OPENAI_API_KEY'], 
+            "model":"gpt-5.1"
+        }
+
 
         reasoner_llm =  LLM("DoqletsReasoner",  config=llm_config)
 

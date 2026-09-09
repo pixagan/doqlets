@@ -54,7 +54,7 @@ const ContentCard = ({ page_id, card}) => {
         <>
 
             
-            <Card style={{border:'None'}}>
+            <Card style={{border:'None', margin:'5px', padding:'5px'}}>
                 <Card.Header style={{border:'None', textAlign:'left', fontWeight:'bold'}} onClick={()=>toggleViewSettings()}>
                     {card.title}
                 </Card.Header>

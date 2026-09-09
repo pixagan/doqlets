@@ -21,8 +21,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import WikiScreen from './screens/WikiScreen'
 import ProjectsScreen from './screens/ProjectsScreen'
-import DoqletsScreen from './screens/DoqletsScreen'
-import DocsScreen from './screens/DocsScreen'
+
+
 
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
@@ -44,9 +44,9 @@ const App = () => {
 
           <Route path='/' element={<WikiScreen />} exact />
           <Route path='/projects' element={<ProjectsScreen />} exact />
-          <Route path='/doqlets' element={<DoqletsScreen />} exact />
-          <Route path='/docs' element={<DocsScreen />} exact />
-
+          <Route path='/doqlets/:project_id' element={<WikiScreen />} exact />
+      
+         
         </Routes>
 
       </main>

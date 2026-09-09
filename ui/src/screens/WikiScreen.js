@@ -30,15 +30,16 @@ import {
 
   import { useNavigate } from 'react-router-dom';
 
-  import PageView from '../components/deck/PageView'
+//   import PageView from '../components/deck/PageView'
   import WikiView from '../components/deck/WikiView'
-  import DataView from '../components/deck/DataView'
-  import AddData from '../components/deck/AddData'
+//   import DataView from '../components/deck/DataView'
+//   import AddData from '../components/deck/AddData'
   import ChatCard from '../components/deck/ChatCard'
   import SearchCard from '../components/deck/SearchCard'
   import AgentCard from '../components/deck/AgentCard'
-  import ProjectModel from '../components/deck/ProjectModel'
-  import DocView from '../components/deck/DocView'
+//   import ProjectModel from '../components/deck/ProjectModel'
+//   import DocView from '../components/deck/DocView'
+  import DocsMain from '../components/deck/DocsMain'
   
 export const WikiScreen = ({match, history}) => {
 
@@ -51,62 +52,30 @@ export const WikiScreen = ({match, history}) => {
     const [sectionType, setSectionType] = useState("all") 
     const [documents, setDocuments] = useState([])
 
-    const [rightView, setRightView] = useState("agents") // chat, add, view
+    const [rightView, setRightView] = useState("wiki") // chat, add, view
     const [query, setQuery] = useState('')
     const [chatHistory, setChatHistory] = useState([])
     const [docPages, setDocPages] = useState([])
 
     const [project_id, setProjectId] = useState(null)
-    const [doc_id, setDocId] = useState(null)
-    const [selectedPage, setSelectedPage] = useState(null)
+    
+    
 
     const [cards, setCards] = useState([])
 
-    const [docs, setDocs] = useState([])
+
+    
 
 
     const [chatView, setChatView] = useState("chat") //search, chat
 
     
-    const addDoc = async () => {
-        var config = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-        const response = await axios.post('/api/pages', { title: pageTitle }, config)
-        console.log("response ", response)
-        setDocs([...docs, response.data.page])
-    }
-
-
-    const loadDocs = async () => {
-        var config = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-        const response = await axios.get(`/api/documents`, config)
-        console.log("response ", response)
-        setDocs(response.data.documents)
-    }
-
-
-    
-
-
-    const selectPage = async (page_id, page_title) => {
-        setDocId(page_id)
-        setSelectedPage({_id:page_id, title:page_title})
-        setRightView("docs")
-
-        //loadPageCards(page_id)
-    }
+   
 
 
     useEffect(() => {
         
-        loadDocs()
+     
 
     }, [])
 
@@ -116,39 +85,13 @@ export const WikiScreen = ({match, history}) => {
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', textAlign: 'center', margin:'5px', padding:'5px' }}>
 
          <Meta title={'Doqlets'} description={'Doqlets'}/>
-    
-         <Row>
-            <Col xs={2} style={{maxHeight: '95vh', overflow: 'scroll'}}>
 
-
-              <ListGroup>
-                <ListGroup.Item style={{padding:'1px'}}>
-                    <InputGroup>
-                    <Form.Control type="text" placeholder="Enter doc title" value={pageTitle} onChange={(e)=>setPageTitle(e.target.value)} />
-                    <Badge onClick={()=>addDoc()}>+</Badge>
-                    </InputGroup>
+         <ListGroup horizontal>
+                <ListGroup.Item onClick={()=>setRightView("wiki")} active={rightView === "wiki"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
+                    Wiki
                 </ListGroup.Item>
-
-                {docs && docs.map((doc, index)=>(
-                    <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold'}} onClick={()=>selectPage(doc._id, doc.title)} active={doc_id === doc._id}>
-                    {doc.title}
-                    </ListGroup.Item>
-                ))}
-                
-              </ListGroup>
-             
-            
-            </Col>
-
-
-            <Col style={{ maxHeight: '95vh', overflow: 'scroll'}}>
-
-            <ListGroup horizontal>
                 <ListGroup.Item onClick={()=>setRightView("docs")} active={rightView === "docs"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Docs
-                </ListGroup.Item>
-                <ListGroup.Item onClick={()=>setRightView("add")} active={rightView === "add"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Add Data
                 </ListGroup.Item>
                 <ListGroup.Item onClick={()=>setRightView("chat")} active={rightView === "chat"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Chat
@@ -156,39 +99,40 @@ export const WikiScreen = ({match, history}) => {
                 <ListGroup.Item onClick={()=>setRightView("agents")} active={rightView === "agents"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Agents
                 </ListGroup.Item>
-                <ListGroup.Item onClick={()=>setRightView("wiki")} active={rightView === "pages"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Wiki
-                </ListGroup.Item>
-                <ListGroup.Item onClick={()=>setRightView("config")} active={rightView === "config"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Project Config
-                </ListGroup.Item>
+               
+               
+               
             </ListGroup>
 
             <br />
+    
+        
 
 
             {rightView === "wiki" && (
                 <div>
                     <WikiView project_id={project_id} />
-                     {/* <PageView project_id={project_id} page_id={page_id} page_title={pageTitle} /> */}
+                   
 
                 </div>
             )}
 
 
             
-            {rightView === "add" && (
+            {/* {rightView === "add" && (
                 <div>
+                    
 
                     <AddData project_id={project_id} />
+                    
                 
                 </div>
-            )}
+            )} */}
 
 
             {rightView === "chat" && (
                 <div>
-
+                    
                     <ListGroup horizontal>
                         <ListGroup.Item onClick={()=>setChatView("chat")} active={chatView === "chat"} style={{paddingTop:'5px', paddingBottom:'5px'}}>Chat</ListGroup.Item>
                         <ListGroup.Item onClick={()=>setChatView("search")} active={chatView === "search"} style={{paddingTop:'5px', paddingBottom:'5px'}}>Search</ListGroup.Item>
@@ -202,6 +146,10 @@ export const WikiScreen = ({match, history}) => {
                     {chatView === "chat" && (
                         <ChatCard project_id={project_id} />
                     )}
+
+                
+
+                  
                    
 
                 </div>
@@ -210,30 +158,22 @@ export const WikiScreen = ({match, history}) => {
 
             {rightView === "agents" && (
                 <div>
+                    
                     <AgentCard project_id={project_id} />
+                 
+                   
                 </div>
             )}
 
 
-            {rightView === "config" && (
-                <div>   
-                    <ProjectModel project_id={project_id} />
-                </div>
-            )}
 
 
             {rightView === "docs" && (
-                <div>
-                    <DocView project_id={project_id} doc_id={doc_id} />
-                </div>
+                <DocsMain project_id={project_id} />
+              
             )}
 
 
-
-            
-            
-            </Col>
-         </Row>
 
 
            

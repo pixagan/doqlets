@@ -45,12 +45,20 @@ from nodes.MongoNode import MongoNode
 from Skilllist import skillist
 from ActionLog import ActionLog
 
+#Data Loaders
+from DataLoader import DataLoader
 from FlowAddData import dataToCardsFlow
+from DocumentLoaderFlow import docloader_flow
+#from FileLoaderFlow import fileloader_flow
+
+#Search and Chat
 from FlowSearch import searchFlow
 from FlowChat import chatFlow
-from FileLoaderFlow import fileloader_flow
-from DocumentLoaderFlow import docloader_flow
+
+#Agents
 from DoqletsAgentManager import DoqletsAgentManager
+
+
 
 
 class ChatInput(BaseModel):
@@ -99,10 +107,14 @@ class DoqletsApp:
         self.db = MongoNode("DoqletsDB", config={"MONGO_URI": self.km["MONGO_URI"], "MONGO_DB": self.km["MONGO_DB"]})
 
 
-        self.d2c_flow    = dataToCardsFlow
+        self.d2c_flow        = dataToCardsFlow
+        self.doc_loader_flow = docloader_flow
+        #self.file_loader_flow = fileloader_flow
+
+        self.data_loader = DataLoader()
+
         self.search_flow = searchFlow
         self.chat_flow   = chatFlow
-        self.doc_loader_flow = docloader_flow
 
         self.action_log = ActionLog()
         self.agent_manager = DoqletsAgentManager()
@@ -139,6 +151,7 @@ class DoqletsApp:
 
 
 
+    #--------------------Documents -------------------------------------------------
 
         @self.api.get("/api/documents")
         async def load_documents():
@@ -193,7 +206,16 @@ class DoqletsApp:
             created_doc = self.db.create_document("documents", new_document)
 
 
-            flow_response = self.doc_loader_flow.run({"data": data})
+            #flow_response = self.doc_loader_flow.run({"data": data})
+
+            flow_response = self.d2c_flow.run({"data": data})
+
+            cards = flow_response["outputs"]["MergeCardsToTags|merge_cards_to_tags|merged_cards"]
+
+            card_ids = [card["_id"] for card in cards]
+
+            self.action_log.add_item("adding_data", "Adding data as text directly to database", {"card_ids": card_ids})
+
 
 
             return_doc = {
@@ -219,15 +241,69 @@ class DoqletsApp:
         async def store_pdf(file: UploadFile = File(...)):
 
             file_content = await file.read()
-            self.store_flow.run({"file": file_content})
+            #self.store_flow.run({"file": file_content})
+
+            title = file.filename
+            
+
+            data = self.data_loader.load_pdf(file_content)
+            doc = {
+                "title": title,
+                "data": data,
+            }
+            created_document = self.db.create_document("document_data", doc)
+
+            new_document = {
+                "project_id":"",
+                "title": title,
+                "source": "file",   #db, file, cloud, web.
+                "doc_id": str(created_document.inserted_id),
+            }
+
+            created_doc = self.db.create_document("documents", new_document)
+
+            flow_response = self.d2c_flow.run({"data": data})
+
+            print("Done with Flow")
+
+            cards = flow_response["outputs"]["MergeCardsToTags|merge_cards_to_tags|merged_cards"]
+
+            card_ids = [card["_id"] for card in cards]
+
+
+    
+            #flow_response = self.doc_loader_flow.run({"data": data})
+            
+            return {"document": new_document}
+
+
+
+        @self.api.put("/api/documents/file")
+        async def update_doc(file: UploadFile = File(...)):
+
+            file_content = await file.read()
+            #self.store_flow.run({"file": file_content})
+
+            data = self.data_loader.load_pdf(file_content)
+
+            new_document = {
+                "project_id":"",
+                "title": title,
+                "source": "file",   #db, file, cloud, web.
+                "doc_id": str(created_document.inserted_id),
+            }
+
+            created_doc = self.db.create_document("documents", new_document)
+
+            flow_response = self.doc_loader_flow.run({"data": data})
             
             return {"message": "PDF stored successfully"}
+
         
 
 
 
-
-
+        #--------------------Wiki -------------------------------------------------
 
         @self.api.post("/api/wiki/store/text")
         async def add_data(data_in:DataInput):
@@ -264,6 +340,12 @@ class DoqletsApp:
 
             created_page = self.db.create_document("pages", {"title": title})
 
+            page_rules = {
+                "page_id": str(created_page.inserted_id),
+                "description": "",
+                "rules": []
+            }
+
 
             new_page = {
                 "_id": str(created_page.inserted_id),
@@ -291,8 +373,7 @@ class DoqletsApp:
 
 
 
-
-
+       #--------------------Search  / RAG -------------------------------------------------
 
 
         @self.api.post("/api/search")
@@ -320,7 +401,7 @@ class DoqletsApp:
             answer = chat_response["outputs"]["AnswerQuery|answer_query|answer"]
             print("chat answer ", answer)
 
-            self.action_log.add_chat_item(query, answer)
+            chat_id = self.action_log.add_chat_item(query, answer)
 
             return {"answer": answer}
 
@@ -360,14 +441,16 @@ class DoqletsApp:
             #print("search_results ", search_response)
             print("task_response ", task_response)
 
-            self.action_log.add_task_item(task_description, skill, task_response["outputs"])
+            task_id = self.action_log.add_task_item(task_description, skill, task_response["outputs"])
 
 
             task_response["task"] = task_description
             task_response["skill"] = skill
-            task_response["_id"] = ""
+            task_response["_id"] = str(task_id)
+            task_response["keypoints"] = task_response["outputs"]["task_keypoints"]
+            task_response["response"] = task_response["outputs"]["output"]
 
-            return {"task_response": task_response["outputs"]}
+            return {"task_response": task_response}
 
 
         @self.api.get("/api/agents")

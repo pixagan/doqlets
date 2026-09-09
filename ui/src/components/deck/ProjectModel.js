@@ -48,7 +48,7 @@ const ProjectModel = ({ project_id }) => {
 
     return (
 
-        <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None'}}>
+        <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None', textAlign:'left'}}>
 
 
             <p className='h4'>Project Configuration</p>

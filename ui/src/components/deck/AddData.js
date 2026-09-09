@@ -20,7 +20,7 @@ import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badg
 import axios from 'axios'
 
 
-const AddData = ({ project_id }) => {
+const AddData = ({ project_id, callBackAddData }) => {
 
     const dispatch = useDispatch()
 
@@ -34,6 +34,22 @@ const AddData = ({ project_id }) => {
 
     const [text, setText] = useState('')
 
+    const [addMode, setAddMode] = useState('all') // all vs page
+
+    const [selectedPage, setSelectedPage] = useState(null)
+    const [pagelist, setPagelist] = useState([])
+
+    const loadPages = async () => {
+        var config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+        const response = await axios.get(`/api/wiki/pages`, config)
+        console.log("response ", response)
+        setPagelist(response.data.pages)
+    }
+
 
     const resizeTextarea = () => {
         const textarea = textareaRef.current
@@ -46,6 +62,7 @@ const AddData = ({ project_id }) => {
         if (!text) return
         const response = await axios.post('/api/documents/text', {title:title, data:text})
         console.log("response ", response.data)
+        callBackAddData(response.data.document)
     }
 
 
@@ -58,12 +75,15 @@ const AddData = ({ project_id }) => {
         formData.append('file', selectedFile)   // must be 'file' to match backend
 
         const response = await axios.post('/api/documents/file', formData)
+        console.log("response ", response.data)
 
-        if(response.status === 200){
-            const responseD = await axios.get('/api/document')
-            console.log("doc_pages ", responseD.data.doc_pages)
-            //setDocPages(responseD.data.doc_pages)
-        }
+        callBackAddData(response.data.document)
+
+        // if(response.status === 200){
+        //     const responseD = await axios.get('/api/document')
+        //     console.log("doc_pages ", responseD.data.doc_pages)
+        //     //setDocPages(responseD.data.doc_pages)
+        // }
         
     }
 
@@ -94,6 +114,21 @@ const AddData = ({ project_id }) => {
                     File
                 </ListGroup.Item>
             </ListGroup>
+
+
+             <InputGroup>
+                <Form.Select addMode={addMode} value={addMode} onChange={(e) => setAddMode(e.target.value)}>
+                    <option value="all">All</option>
+                    <option value="page">Page</option>
+                </Form.Select>
+
+                <Form.Select value={selectedPage} value={addMode === 'page' ? selectedPage : null} onChange={(e) => setSelectedPage(e.target.value)}>
+                    {pagelist.map((page, index) => (
+                        <option key={index} value={page._id}>{page.title}</option>
+                    ))}
+                </Form.Select>
+             </InputGroup>
+             
 
 
             {selectedType === 'text' && (
