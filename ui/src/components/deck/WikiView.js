@@ -19,12 +19,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badge } from 'react-bootstrap'
 import axios from 'axios'
 import PageView from './PageView'
+import AddWikiPage from './AddWikiPage'
 
 const WikiView = ({ project_id }) => {
 
     const dispatch = useDispatch()
 
     const textareaRef = useRef(null)
+
+
+    const [rightView, setRightView] = useState('wiki') //wiki. add
 
     const [pageTitle, setPageTitle] = useState('')
 
@@ -44,6 +48,10 @@ const WikiView = ({ project_id }) => {
         textarea.style.height = textarea.scrollHeight + 'px'
     }
 
+
+    const setAddPageRequest = (page) => {
+        setPages([...pages, page])
+    }
 
     const addPage = async () => {
         var config = {
@@ -76,6 +84,7 @@ const WikiView = ({ project_id }) => {
         setPageId(page_id)
         //setPageTitle(page_title)
         setSelectedPage(page_id)
+        setRightView('wiki')
     
 
         //loadPageCards(page_id)
@@ -99,12 +108,17 @@ const WikiView = ({ project_id }) => {
              {/* <DataView project_id={project_id} /> */}
 
               <ListGroup>
-                <ListGroup.Item style={{padding:'1px'}}>
+                {/* <ListGroup.Item style={{padding:'1px'}}>
                     <InputGroup>
                     <Form.Control type="text" placeholder="Enter page title" value={pageTitle} onChange={(e)=>setPageTitle(e.target.value)} />
                     <Badge onClick={()=>addPage()}>+</Badge>
                     </InputGroup>
+                </ListGroup.Item> */}
+
+                <ListGroup.Item style={{padding:'5px', border:'None'}}>
+                    <Button onClick={()=>setRightView('add')} style={{width:'90%', backgroundColor:'blue', borderRadius:'10px'}}>Add Page</Button>
                 </ListGroup.Item>
+                    
 
               {pages && pages.map((page, index)=>(
                 <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold'}} onClick={()=>selectPage(page.uid, page.title)} active={page_id === page.uid}>
@@ -118,8 +132,12 @@ const WikiView = ({ project_id }) => {
 
 
               <Col>
+              {rightView === "wiki" && (
               <PageView project_id={project_id} page_id={page_id} page_title={pageTitle} />
-              
+              )}
+              {rightView === "add" && (
+                <AddWikiPage project_id={project_id} setAddPageRequest={setAddPageRequest}/>
+              )}
               </Col>
              
             

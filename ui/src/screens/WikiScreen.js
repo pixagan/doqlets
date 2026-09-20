@@ -118,16 +118,7 @@ export const WikiScreen = ({match, history}) => {
             )}
 
 
-            
-            {/* {rightView === "add" && (
-                <div>
-                    
-
-                    <AddData project_id={project_id} />
-                    
-                
-                </div>
-            )} */}
+        
 
 
             {rightView === "chat" && (

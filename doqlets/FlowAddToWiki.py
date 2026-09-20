@@ -47,135 +47,71 @@ vector_store = ChromaNode("ChromaNode", config={"db_path": km["CHROMA_PATH"]})
 
 cleanup_llm = LLM('Cleanup_LLM', config=llm_config)
 
-def data_to_cards(data):
-    print("Convert data into cards")
 
-    print(data)
 
-    messages = [
-        {
-            "role":"system",
-            "content":"""Your job is to clean up the information provided and convert into structured content cards.
-            The different types of cards are shown below. Breaking the information into cards is to break large documents or pieces of information into
-            smaller pieces of information.
+def find_relevant_pages(page_ids):
+    print("Load page")
 
-            The different card types are : """ +  str(card_types) + """
+    cpages = db.load_documents("pages", {"_id": {"$in": page_ids}})
 
-            Respond in the JSON format shown below: 
-            {"cards":[
-                {
-                    "card_type":"text",
-                    "title":"The header of the card",
-                    "uid":"title with spaces replaced with underscores and specical character if any removed in lower case",
-                    "card_topic":"What the card is about. This helps figure out which page the card should be added to and where to add new data."
-                    "content":"The content of the card",
-                },
-                {
-                    "card_type":"image",
-                    "title":"The header of the card",
-                    "uid":"title with spaces replaced with underscores and specical character if any removed in lower case ",
-                    "content":"A description of the image",
-                    "card_topic":"What the card is about",
-                    "url":"The url of the image"
-                },
-                {
-                    "card_type":"table",
-                    "title":"The header of the card",
-                    "uid":"title with spaces replaced with underscores and specical character if any removed in lower case",
-                    "content":"A description of the table",
-                    "card_topic":"What the card is about",
-                    "data":"the data of the table in csv format"
-                }
-            ]}
-            """
-        },
-        {
-            "role":"user",
-            "content":"The information to be converted into cards is: " + str(data)
-        }
-    ]
+    pages = []
+    for cpage in cpages:
+        pages.append({
+            "id": str(cpage["_id"]),
+            "description": cpage["description"],
+            "sections": cpage["sections"],
+            "rules": cpage["rules"]
+        })
 
-    response = cleanup_llm.call_llm(messages)
+    page_description = cpage["description"]
+    sections = cpage["sections"]
 
-    content = response['message'].content
-
-    print("Cards : ", content)
-
-    content = json.loads(content)
-
-    cards = content['cards']
+    #page rules, page sections
 
     return {
-        "cards":cards
+        "page_description":page_description,
+        "sections":sections
     }
-    
-dataToCardsNode = Node("DataToCards")
 
-dataToCardsNode_inputs = [  
+loadPageNode = Node("LoadPage")
+
+loadPageNode_inputs = [
     {
-        "name": "data",
-        "type": "text",
-        "description": "The data to be converted into cards",
+        "name": "page_id",
+        "type": "string",
+        "description": "The id of the page to be loaded",
         "inputType": "source",
         "source": "",
         "value": None
     }
 ]
 
-dataToCardsNode_outputs = [
+loadPageNode_outputs = [
     {
-        "name": "cards", 
+        "name": "section_list", 
         "type": "array",
-        "description": "The cards converted from the data"
+        "description": "The list of sections in the page"
+    },
+    {
+        "name": "page_description",
+        "type": "string",
+        "description": "The description of the page",
+        "inputType": "source",
+        "source": "",
+        "value": None
     }
 ]
 
-dataToCardsNode.set_function("data_to_cards", data_to_cards, {}, dataToCardsNode_inputs, dataToCardsNode_outputs)
+loadPageNode.set_function("load_page", load_page, {}, loadPageNode_inputs, loadPageNode_outputs)
 
 
-
-
-
-
-def load_pages():
-    print("Load sections")
-
-    pages = db.load_documents("pages", {})
-
-    pagelist = []
-
-    for page in pages:
-        new_sections = {
-            "name": page["title"],
-            "uid": page["uid"]
-        }
-        pagelist.append(new_sections)
-
-
-    return {
-        "pages":pagelist
-    }
-
-loadPagesNode = Node("LoadPages")
-
-loadPagesNode_inputs = []
-
-loadPagesNode_outputs = [
-    {
-        "name": "pages", 
-        "type": "array",
-        "description": "The pages loaded from the database"
-    }
-]
-
-loadPagesNode.set_function("load_pages", load_pages, {}, loadPagesNode_inputs, loadPagesNode_outputs)
 
 
 
 
 classify_llm = LLM('Classify_LLM', config=llm_config)
 
-def tag_cards(cards, pages):
+def merge_sections(cards, pages):
     print("Classify cards")
 
     messages = [
@@ -217,6 +153,7 @@ def tag_cards(cards, pages):
         }
     ]
 
+
     response = classify_llm.call_llm(messages)
 
     content = response['message'].content
@@ -233,9 +170,9 @@ def tag_cards(cards, pages):
 
 
 
-tagCardsNode = Node("TagCards")
+mergeSectionsNode = Node("TagCards")
 
-tagCardsNode_inputs = [
+mergeSectionsNode_inputs = [
     {
         "name": "cards",
         "type": "array",
@@ -254,7 +191,7 @@ tagCardsNode_inputs = [
     }
 ]
 
-tagCardsNode_outputs = [
+mergeSectionsNode_outputs = [
     {
         "name": "tag_cards", 
         "type": "dict", 
@@ -263,62 +200,14 @@ tagCardsNode_outputs = [
     
 ]
 
-tagCardsNode.set_function("tag_cards", tag_cards, {}, tagCardsNode_inputs, tagCardsNode_outputs)
-
-
-
-def merge_cards_to_tags(cards, tag_cards):
-    print("Merge cards to pages")
-
-    for card in cards:
-        card_title = card["title"]
-        page = tag_cards[card_title]["page"]
-        tags = tag_cards[card_title]["tags"]
-        connections = tag_cards[card_title]["connections"]
-
-        card["page"] = page
-        card["tags"] = tags
-        card["connections"] = connections
-
-    return {
-        "merged_cards":cards
-    }
-
-mergeCardsToTagsNode = Node("MergeCardsToTags")
-
-mergeCardsToTagsNode_inputs = [
-    {
-        "name": "cards",
-        "type": "array",
-        "description": "The cards to be merged to pages",
-        "inputType": "source",
-        "source": "",
-        "value": None
-    },
-    {
-        "name": "tag_cards",
-        "type": "dict",
-        "description": "The tags of the cards",
-        "inputType": "source",
-        "source": "",
-        "value": None
-    }
-]
-
-mergeCardsToTagsNode_outputs = [
-    {
-        "name": "merged_cards", 
-        "type": "array", 
-        "description": "The cards merged to pages"
-    },
-]
-
-mergeCardsToTagsNode.set_function("merge_cards_to_tags", merge_cards_to_tags, {}, mergeCardsToTagsNode_inputs, mergeCardsToTagsNode_outputs)
+mergeSectionsNode.set_function("merge_sections", merge_sections, {}, mergeSectionsNode_inputs, mergeSectionsNode_outputs)
 
 
 
 
-def push_cards_to_db(cards):
+
+
+def update_sections_to_db(sections):
     print("Push cards to db")
     print(cards)
 
@@ -331,6 +220,7 @@ def push_cards_to_db(cards):
             "id": str(created_card.inserted_id),
             "title": card["title"],
             "uid": card["uid"],
+            "page_id": page_id,
         })
 
         card_id_maps[card["uid"]] = {
@@ -374,53 +264,6 @@ pushCardsToDBNode.set_function("push_cards_to_db", push_cards_to_db, {}, pushCar
 
 
 
-def prep_vectorstore_cards(cards):
-
-    print("Vectorize cards")
-
-    documents = []
-    metadatas = []
-
-    for card in cards:
-        documents.append(card["content"])
-        metadatas.append({
-            "uid": card["uid"],
-            "title": card["title"],
-        })
-
-    return {
-        "documents":documents,
-        "metadatas":metadatas
-    }
-
-prepVectorstoreCardsNode = Node("PrepVectorstoreCards")
-
-prepVectorstoreCardsNode_inputs = [
-    {
-        "name": "cards",
-        "type": "array",
-        "description": "The cards to be vectorized",
-        "inputType": "source",
-        "source": "",
-        "value": None
-    }
-]
-
-prepVectorstoreCardsNode_outputs = [
-    {
-        "name": "documents", 
-        "type": "array", 
-        "description": "The documents to be vectorized"
-    },
-    {
-        "name": "metadatas",
-        "type": "array",
-        "description": "The metadatas to be vectorized"
-    }
-]
-
-prepVectorstoreCardsNode.set_function("prep_vectorstore_cards", prep_vectorstore_cards, {}, prepVectorstoreCardsNode_inputs, prepVectorstoreCardsNode_outputs)
-
 
 
 
@@ -428,23 +271,21 @@ prepVectorstoreCardsNode.set_function("prep_vectorstore_cards", prep_vectorstore
 #----------------- Flow 1 ---------------------------------------
 # Data -> Cards -> Tag -> Duplication Pipeline -> Old/New Cards -> Old Cards removal Pipeline -> New Cards Add Pipeline
 
-dataToCardsFlow = Flow("DataToCardsFlow")
+addToWikiFlow = Flow("AddToWikiFlow")
+
+addToWikiFlow.add_node(loadPageNode)
+addToWikiFlow.add_node(mergeSectionsNode)
+addToWikiFlow.add_node(pushCardsToDBNode)
+addToWikiFlow.add_node(prepVectorstoreCardsNode)
+addToWikiFlow.add_node(vector_store)
 
 
-dataToCardsFlow.add_node(dataToCardsNode)
-dataToCardsFlow.add_node(tagCardsNode)
-dataToCardsFlow.add_node(pushCardsToDBNode)
-dataToCardsFlow.add_node(loadPagesNode)
-dataToCardsFlow.add_node(mergeCardsToTagsNode)
-dataToCardsFlow.add_node(prepVectorstoreCardsNode)
-dataToCardsFlow.add_node(vector_store)
-
-
-dataToCardsFlow.add_edge("START", "LoadPages|load_pages")
-dataToCardsFlow.add_edge("LoadPages|load_pages", "DataToCards|data_to_cards")
-dataToCardsFlow.add_edge("DataToCards|data_to_cards", "TagCards|tag_cards")
-dataToCardsFlow.add_edge("TagCards|tag_cards", "MergeCardsToTags|merge_cards_to_tags")
-dataToCardsFlow.add_edge("MergeCardsToTags|merge_cards_to_tags", "PushCardsToDB|push_cards_to_db")
+addToWikiFlow.add_edge("START", "LoadPages|load_pages")
+addToWikiFlow.add_edge("LoadPages|load_pages", "MergeSections|merge_sections")
+addToWikiFlow.add_edge("MergeSections|merge_sections", "PushCardsToDB|push_cards_to_db")
+addToWikiFlow.add_edge("PushCardsToDB|push_cards_to_db", "PrepVectorstoreCards|prep_vectorstore_cards")
+addToWikiFlow.add_edge("PrepVectorstoreCards|prep_vectorstore_cards", "ChromaNode|add_documents")
+addToWikiFlow.add_edge("ChromaNode|add_documents", "END")
 
 dataToCardsFlow.add_edge("PushCardsToDB|push_cards_to_db", "PrepVectorstoreCards|prep_vectorstore_cards")
 dataToCardsFlow.add_edge("PrepVectorstoreCards|prep_vectorstore_cards", "ChromaNode|add_documents")

@@ -6,6 +6,8 @@
 /ui/package-lock.json
 /nodes/.env
 /doqlets/.env
+/doqlets/scripts
+/doqlets/UpdateVectorStoreDB.py
 
 # macOS
 .DS_Store

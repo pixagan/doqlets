@@ -28,7 +28,7 @@ const AddData = ({ project_id, callBackAddData }) => {
 
 
     const [selectedType, setSelectedType] = useState('text')
-
+    const [selectPage, setSelectPage] = useState(null)
 
     const [title, setTitle] = useState('')
 
@@ -117,12 +117,15 @@ const AddData = ({ project_id, callBackAddData }) => {
 
 
              <InputGroup>
-                <Form.Select addMode={addMode} value={addMode} onChange={(e) => setAddMode(e.target.value)}>
+                {/* <Form.Select addMode={addMode} value={addMode} onChange={(e) => setAddMode(e.target.value)}>
                     <option value="all">All</option>
                     <option value="page">Page</option>
-                </Form.Select>
+                </Form.Select> */}
 
-                <Form.Select value={selectedPage} value={addMode === 'page' ? selectedPage : null} onChange={(e) => setSelectedPage(e.target.value)}>
+          
+                <Form.Control type="text" placeholder="Select Page to add data to" value={selectPage} onChange={(e) => setSelectPage(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
+
+                <Form.Select value={selectedPage} onChange={(e) => setSelectedPage(e.target.value)}>
                     {pagelist.map((page, index) => (
                         <option key={index} value={page._id}>{page.title}</option>
                     ))}

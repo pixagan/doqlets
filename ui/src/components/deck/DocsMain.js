@@ -103,14 +103,14 @@ const DocsMain = ({ project_id }) => {
                     
                     <ListGroup>
                         <ListGroup.Item style={{borderLeft:'None', borderRight:'None', borderTop:'None'}}>
-                        <Button onClick={()=>setRightView("add")} style={{width:'80%'}}>Add Data</Button>
+                        <Button onClick={()=>setRightView("add")} style={{width:'80%', backgroundColor:'blue', borderRadius:'10px'}}>Add Data</Button>
                         </ListGroup.Item>
-                        <ListGroup.Item style={{padding:'1px'}}>
+                        {/* <ListGroup.Item style={{padding:'1px'}}>
                             <InputGroup>
                             <Form.Control type="text" placeholder="Enter doc title" value={pageTitle} onChange={(e)=>setPageTitle(e.target.value)} />
                             <Badge onClick={()=>addDoc()}>+</Badge>
                             </InputGroup>
-                        </ListGroup.Item>
+                        </ListGroup.Item> */}
 
                         {docs && docs.map((doc, index)=>(
                             <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold'}} onClick={()=>selectPage(doc._id, doc.title)} active={doc_id === doc._id}>

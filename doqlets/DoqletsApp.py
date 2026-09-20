@@ -70,6 +70,8 @@ class DataInput(BaseModel):
 
 class PageCreate(BaseModel):
     title: str
+    description: str
+    pageRules: str
 
 class SearchInput(BaseModel):
     query: str
@@ -322,6 +324,9 @@ class DoqletsApp:
 
 
 
+
+        # --- Pages --------
+
         @self.api.get("/api/wiki/pages")
         async def load_pages():
 
@@ -335,6 +340,8 @@ class DoqletsApp:
         async def add_page(page_create:PageCreate):
 
             title = page_create.title
+            description = page_create.description
+            page_rules = page_create.pageRules
 
             uid = title.strip().replace(" ", "_").lower()
 
@@ -342,9 +349,12 @@ class DoqletsApp:
 
             page_rules = {
                 "page_id": str(created_page.inserted_id),
-                "description": "",
-                "rules": []
+                "description": description,
+                "rules": page_rules,
+                "sections": []
             }
+
+            created_page_rules = self.db.create_document("page_rules", page_rules)
 
 
             new_page = {
@@ -371,6 +381,45 @@ class DoqletsApp:
             return {"cards": cards, "page_model": page_model}
 
 
+
+        # --- Sections --------
+        @self.api.post("/api/wiki/pages/sections/{page_uid}")
+        async def add_card(page_uid: str):
+            cards = self.db.load_documents("cards", {"page":page_uid})
+            for card in cards:  
+                card["_id"] = str(card["_id"])
+
+
+            page_model = self.db.load_document("pages", {"uid":page_uid})
+            page_model["_id"] = str(page_model["_id"])
+            return {"cards": cards, "page_model": page_model}
+
+
+
+        # --- Cards --------
+        @self.api.post("/api/wiki/pages/cards/{page_uid}")
+        async def add_card(page_uid: str):
+            cards = self.db.load_documents("cards", {"page":page_uid})
+            for card in cards:  
+                card["_id"] = str(card["_id"])
+
+
+            page_model = self.db.load_document("pages", {"uid":page_uid})
+            page_model["_id"] = str(page_model["_id"])
+            return {"cards": cards, "page_model": page_model}
+
+
+
+        @self.api.put("/api/wiki/pages/cards/{page_uid}")
+        async def add_card(page_uid: str):
+            cards = self.db.load_documents("cards", {"page":page_uid})
+            for card in cards:  
+                card["_id"] = str(card["_id"])
+
+
+            page_model = self.db.load_document("pages", {"uid":page_uid})
+            page_model["_id"] = str(page_model["_id"])
+            return {"cards": cards, "page_model": page_model}
 
 
        #--------------------Search  / RAG -------------------------------------------------
