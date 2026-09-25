@@ -8,6 +8,8 @@
 /doqlets/.env
 /doqlets/scripts
 /doqlets/UpdateVectorStoreDB.py
+/doqlets/TestAddToWiki.py
+/doqlets/TestInitializeWiki.py
 
 # macOS
 .DS_Store
