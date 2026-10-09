@@ -59,7 +59,7 @@ const WikiView = ({ project_id }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post('/api/wiki/pages', { title: pageTitle }, config)
+        const response = await axios.post('/api/pages', { title: pageTitle }, config)
         console.log("response ", response)
         setPages([...pages, response.data.page])
     }
@@ -71,7 +71,7 @@ const WikiView = ({ project_id }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.get(`/api/wiki/pages`, config)
+        const response = await axios.get(`/api/pages`, config)
         console.log("response ", response)
         setPages(response.data.pages)
     }
@@ -80,7 +80,7 @@ const WikiView = ({ project_id }) => {
     
 
 
-    const selectPage = async (page_id, page_title) => {
+    const selectPage = async (page_id, page_uid, page_title) => {
         setPageId(page_id)
         //setPageTitle(page_title)
         setSelectedPage(page_id)
@@ -121,7 +121,7 @@ const WikiView = ({ project_id }) => {
                     
 
               {pages && pages.map((page, index)=>(
-                <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold'}} onClick={()=>selectPage(page.uid, page.title)} active={page_id === page.uid}>
+                <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold'}} onClick={()=>selectPage(page._id, page.uid, page.title)} active={page_id === page.uid}>
                 {page.title}
                 </ListGroup.Item>
              ))}

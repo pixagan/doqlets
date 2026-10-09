@@ -10,6 +10,11 @@
 /doqlets/UpdateVectorStoreDB.py
 /doqlets/TestAddToWiki.py
 /doqlets/TestInitializeWiki.py
+/doqlets/TestAddCard.py
+/doqlets/backup
+/doqlets/TestAddBlock.py
+/doqlets/TestDocToBlock.py
+/doqlets/FlowUpdateBlock.py
 
 # macOS
 .DS_Store

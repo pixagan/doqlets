@@ -52,7 +52,7 @@ const AddWikiPage = ({ project_id, callBackAddData, setAddPageRequest }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post('/api/wiki/pages', { title: title, description:description, pageRules:pageRules }, config)
+        const response = await axios.post('/api/pages', { title: title, description:description, pageRules:pageRules }, config)
         console.log("response ", response)
         //setPages([...pages, response.data.page])
 
@@ -77,8 +77,9 @@ const AddWikiPage = ({ project_id, callBackAddData, setAddPageRequest }) => {
                 <Button style={{textAlign:'left'}}>Add Page</Button>
         
                 <Form.Control type="text" placeholder="Enter title" value={title} onChange={(e) => setTitle(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
-                <Form.Control as="textarea" rows={5} placeholder="Page Rules" value={pageRules} onChange={(e) => setPageRules(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
-                <Form.Control as="textarea" rows={5} placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
+                <Form.Control as="textarea" rows={5} placeholder="Description (what the page is about)" value={description} onChange={(e) => setDescription(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
+                <Form.Control as="textarea" rows={5} placeholder="Page Rules (what content should show up, any formatting requests etc.)" value={pageRules} onChange={(e) => setPageRules(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
+               
             
             </div>
         )

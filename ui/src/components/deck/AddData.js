@@ -28,9 +28,10 @@ const AddData = ({ project_id, callBackAddData }) => {
 
 
     const [selectedType, setSelectedType] = useState('text')
-    const [selectPage, setSelectPage] = useState(null)
+    const [selectPage, setSelectPage] = useState('')
 
     const [title, setTitle] = useState('')
+    const [addRelatedPages, setAddRelatedPages] = useState(false)
 
     const [text, setText] = useState('')
 
@@ -60,7 +61,7 @@ const AddData = ({ project_id, callBackAddData }) => {
 
     const uploadText = async () => {
         if (!text) return
-        const response = await axios.post('/api/documents/text', {title:title, data:text})
+        const response = await axios.post('/api/documents/text', {title:title, data:text, related_pages:selectPage})
         console.log("response ", response.data)
         callBackAddData(response.data.document)
     }
@@ -73,7 +74,8 @@ const AddData = ({ project_id, callBackAddData }) => {
         if (!selectedFile) return
         const formData = new FormData()
         formData.append('file', selectedFile)   // must be 'file' to match backend
-
+        formData.append('related_pages', selectPage)
+        
         const response = await axios.post('/api/documents/file', formData)
         console.log("response ", response.data)
 
@@ -115,30 +117,15 @@ const AddData = ({ project_id, callBackAddData }) => {
                 </ListGroup.Item>
             </ListGroup>
 
-
-             <InputGroup>
-                {/* <Form.Select addMode={addMode} value={addMode} onChange={(e) => setAddMode(e.target.value)}>
-                    <option value="all">All</option>
-                    <option value="page">Page</option>
-                </Form.Select> */}
-
-          
-                <Form.Control type="text" placeholder="Select Page to add data to" value={selectPage} onChange={(e) => setSelectPage(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
-
-                <Form.Select value={selectedPage} onChange={(e) => setSelectedPage(e.target.value)}>
-                    {pagelist.map((page, index) => (
-                        <option key={index} value={page._id}>{page.title}</option>
-                    ))}
-                </Form.Select>
-             </InputGroup>
-             
+           
+            <Form.Control type="text" placeholder="Manually select Pages to update to using @PageName1, @PageName2, etc." value={selectPage} onChange={(e) => setSelectPage(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
 
 
             {selectedType === 'text' && (
                 <div>
                     
-                    <Form.Control type="text" placeholder="Enter title" value={title} onChange={(e) => setTitle(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
-                    <Form.Control as="textarea" rows={20} placeholder="Enter text" value={text} onChange={(e) => setText(e.target.value)} onInput={resizeTextarea} ref={textareaRef}/>
+                    <Form.Control type="text" placeholder="Enter title (required)" value={title} onChange={(e) => setTitle(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
+                    <Form.Control as="textarea" rows={20} placeholder="Enter text content" value={text} onChange={(e) => setText(e.target.value)} onInput={resizeTextarea} ref={textareaRef}/>
                     <Button variant="primary" onClick={()=>uploadText()}>Upload</Button>
                 </div>
             )}

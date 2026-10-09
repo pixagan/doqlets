@@ -52,7 +52,7 @@ export const WikiScreen = ({match, history}) => {
     const [sectionType, setSectionType] = useState("all") 
     const [documents, setDocuments] = useState([])
 
-    const [rightView, setRightView] = useState("wiki") // chat, add, view
+    const [rightView, setRightView] = useState("docs") // chat, add, view
     const [query, setQuery] = useState('')
     const [chatHistory, setChatHistory] = useState([])
     const [docPages, setDocPages] = useState([])
@@ -87,11 +87,12 @@ export const WikiScreen = ({match, history}) => {
          <Meta title={'Doqlets'} description={'Doqlets'}/>
 
          <ListGroup horizontal>
-                <ListGroup.Item onClick={()=>setRightView("wiki")} active={rightView === "wiki"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Wiki
-                </ListGroup.Item>
+                
                 <ListGroup.Item onClick={()=>setRightView("docs")} active={rightView === "docs"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Docs
+                </ListGroup.Item>
+                <ListGroup.Item onClick={()=>setRightView("wiki")} active={rightView === "wiki"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
+                    Pages
                 </ListGroup.Item>
                 <ListGroup.Item onClick={()=>setRightView("chat")} active={rightView === "chat"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Chat

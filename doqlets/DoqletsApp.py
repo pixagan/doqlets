@@ -48,7 +48,7 @@ from ActionLog import ActionLog
 #Data Loaders
 from DataLoader import DataLoader
 from FlowAddData import dataToCardsFlow
-from DocumentLoaderFlow import docloader_flow
+#from FlowDocumentLoader import docloader_flow
 #from FileLoaderFlow import fileloader_flow
 
 #Search and Chat
@@ -80,6 +80,11 @@ class AgentInput(BaseModel):
     skill: str
     task: str
 
+class BlockCreate(BaseModel):
+    title: str
+    block_type: str
+    rules: str
+
 
 class DoqletsApp:
 
@@ -110,7 +115,7 @@ class DoqletsApp:
 
 
         self.d2c_flow        = dataToCardsFlow
-        self.doc_loader_flow = docloader_flow
+        #self.doc_loader_flow = docloader_flow
         #self.file_loader_flow = fileloader_flow
 
         self.data_loader = DataLoader()
@@ -121,18 +126,10 @@ class DoqletsApp:
         self.action_log = ActionLog()
         self.agent_manager = DoqletsAgentManager()
 
-        self.setup_components()
-        self.setup_flow()
+
         self.setup_routes()
 
 
-    def setup_components(self):
-        print("Setting up components")
-
-
-
-    def setup_flow(self):
-        print("Setting up store flow")
 
 
     def setup_routes(self):
@@ -181,6 +178,19 @@ class DoqletsApp:
             document["_id"] = str(document["_id"])
 
             return {"document": document}
+
+
+        @self.api.get("/api/documents/cards/{page_uid}")
+        async def load_page_cards(page_uid: str):
+            cards = self.db.load_documents("cards", {"page":page_uid})
+            for card in cards:  
+                card["_id"] = str(card["_id"])
+
+
+            page_model = self.db.load_document("pages", {"uid":page_uid})
+            page_model["_id"] = str(page_model["_id"])
+            return {"cards": cards, "page_model": page_model}
+
 
 
         @self.api.post("/api/documents/text")
@@ -307,27 +317,29 @@ class DoqletsApp:
 
         #--------------------Wiki -------------------------------------------------
 
-        @self.api.post("/api/wiki/store/text")
-        async def add_data(data_in:DataInput):
-
-            data = data_in.data
-
-            flow_response = self.d2c_flow.run({"data": data})
-
-            cards = flow_response["outputs"]["MergeCardsToTags|merge_cards_to_tags|merged_cards"]
-
-            card_ids = [card["_id"] for card in cards]
-
-            self.action_log.add_item("adding_data", "Adding data as text directly to database", {"card_ids": card_ids})
-
-            return {"cards": merged_cards}
+#        @self.api.post("/api/wiki/store/text")
+#        async def add_data(data_in:DataInput):
+#
+#            data = data_in.data
+#
+#            flow_response = self.d2c_flow.run({"data": data})
+#
+#            cards = flow_response["outputs"]["MergeCardsToTags|merge_cards_to_tags|merged_cards"]
+#
+#            card_ids = [card["_id"] for card in cards]
+#
+#            #add cards to pages
+#
+#            self.action_log.add_item("adding_data", "Adding data as text directly to database", {"card_ids": card_ids})
+#
+#            return {"cards": merged_cards}
 
 
 
 
         # --- Pages --------
 
-        @self.api.get("/api/wiki/pages")
+        @self.api.get("/api/pages")
         async def load_pages():
 
             pages = self.db.load_documents("pages", {})
@@ -336,7 +348,7 @@ class DoqletsApp:
             return {"pages": pages}
 
 
-        @self.api.post("/api/wiki/pages")
+        @self.api.post("/api/pages")
         async def add_page(page_create:PageCreate):
 
             title = page_create.title
@@ -369,57 +381,65 @@ class DoqletsApp:
             return {"page": new_page}
 
 
-        @self.api.get("/api/wiki/pages/{page_uid}")
+        @self.api.get("/api/pages/{page_uid}")
         async def load_page(page_uid: str):
-            cards = self.db.load_documents("cards", {"page":page_uid})
+            cards = self.db.load_documents("blocks", {"page_id":page_uid})
             for card in cards:  
                 card["_id"] = str(card["_id"])
 
+            print("cards ", cards)
 
-            page_model = self.db.load_document("pages", {"uid":page_uid})
+
+            page_model = self.db.load_document_id("pages", page_uid)
+            print("page_model ", page_model)
             page_model["_id"] = str(page_model["_id"])
             return {"cards": cards, "page_model": page_model}
 
 
 
-        # --- Sections --------
-        @self.api.post("/api/wiki/pages/sections/{page_uid}")
-        async def add_card(page_uid: str):
-            cards = self.db.load_documents("cards", {"page":page_uid})
-            for card in cards:  
-                card["_id"] = str(card["_id"])
+        # --- Blocks --------
+
+        @self.api.post("/api/pages/blocks/{page_id}")
+        async def add_block(page_id: str, block_create:BlockCreate):
+
+            title = block_create.title
+            block_type = block_create.block_type
+            rules = block_create.rules
+
+            newBlock = {
+                "page_id":page_id,
+                "title":title,
+                "block_type":block_type,
+                "position":0,
+                "uid":"",
+                "content":"",
+                "connections":[],
+                "tags":[]
+            }
+            created_block = self.db.create_document("blocks", newBlock)
+
+            newBlockRules = {
+                "title":title,
+                "block_id":str(created_block.inserted_id),
+                "rules":rules,
+                "type":block_type
+            }
+
+            new_block = self.db.create_document("block_rules", newBlockRules)
+
+            new_block["_id"] = str(created_block.inserted_id)
+            return {"block": new_block}
 
 
-            page_model = self.db.load_document("pages", {"uid":page_uid})
-            page_model["_id"] = str(page_model["_id"])
-            return {"cards": cards, "page_model": page_model}
 
 
 
-        # --- Cards --------
-        @self.api.post("/api/wiki/pages/cards/{page_uid}")
-        async def add_card(page_uid: str):
-            cards = self.db.load_documents("cards", {"page":page_uid})
-            for card in cards:  
-                card["_id"] = str(card["_id"])
+        @self.api.put("/api/pages/blocks/{page_uid}/block_id")
+        async def update_block(page_uid: str):
 
+            cblock = self.db.load_document_id("blocks", block_id)
 
-            page_model = self.db.load_document("pages", {"uid":page_uid})
-            page_model["_id"] = str(page_model["_id"])
-            return {"cards": cards, "page_model": page_model}
-
-
-
-        @self.api.put("/api/wiki/pages/cards/{page_uid}")
-        async def add_card(page_uid: str):
-            cards = self.db.load_documents("cards", {"page":page_uid})
-            for card in cards:  
-                card["_id"] = str(card["_id"])
-
-
-            page_model = self.db.load_document("pages", {"uid":page_uid})
-            page_model["_id"] = str(page_model["_id"])
-            return {"cards": cards, "page_model": page_model}
+            return {"block": cblock}
 
 
        #--------------------Search  / RAG -------------------------------------------------

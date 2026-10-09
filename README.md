@@ -1,4 +1,4 @@
-# Doqlets - Turn your documents into living knowldge, build custom pages/views, RAG and Agents built in
+# Doqlets - Turn your documents into living intelligence, build intelligent pages block by block. RAG and Agents built in to work on the data.
 Built on the Laeyerz Library (https://github.com/pixagan/Laeyerz)
 
 ## License

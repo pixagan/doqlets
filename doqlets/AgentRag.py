@@ -12,34 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import os
 
 from laeyerz.flow.Flow import Flow
 from laeyerz.flow.Node import Node
 from laeyerz.agent.Agent import Agent
 
+from laeyerz_nodes.llm.OpenAINode import OpenAINode as LLM   
+
+
 from laeyerz.utils.KeyManager import KeyManager
 
-from nodes.OpenAINode import OpenAINode as LLM
-
-from AgentTools import tools
+from nodes.ChromaNode import ChromaNode
 
 
-#--------------------------- Storage Flow ----------------------------
 #API key path
-km = KeyManager()
+km = KeyManager('../../.env')
 
-
-llm_config={
-    "api_key":km['OPENAI_API_KEY'], 
-    "model":"gpt-5.1"
-}
+vector_store = ChromaNode("ChromaNode", config={"db_path": km["CHROMA_PATH"]})
 
 
 api_key = km.get('OPENAI_API_KEY')
 
-reasoner_llm =  LLM("DoqletsAgent",  config=llm_config)
+reasoner_llm =  LLM("RAGAgent",  config={"api_key": api_key, "model":"gpt-5.1"})
 agent_role = "You are a RAG agent that answers questions about the documents."
 agent_instructions = """You will be given a query by the user.
 
@@ -65,14 +60,15 @@ Do not make up any information to answer a query, make sure the responses are ba
 Tools Provided:
 Semantic Search Tool - queries a vector store
 BM25 Keyword Search Tool - queries a BM25 database
-LLM Tool - Rewording the user query to imporve Semantic Search Hits
-Slide Planner Tool - Generating the answer based on the query and the chunks
-Report Planner Tool - Generating the answer based on the query and the chunks
+Query Reworder Tool - Rewording the user query to imporve Semantic Search Hits
+Answer Drafter - Generating the answer based on the query and the chunks
+
+
 """
 
 
-doqlets_agent = Agent( name="DoqletsAgent", config = {
-        "api_key_path":'.env',
+rag_agent = Agent( name="RAGAgent", config = {
+        "api_key_path":'../../.env',
         "reasoner":reasoner_llm, 
         "role":agent_role, 
         "instructions":agent_instructions, 
@@ -81,14 +77,34 @@ doqlets_agent = Agent( name="DoqletsAgent", config = {
 )
 
 
-#------------ Adding all available tools to the agent
-for tool in tools:
-    doqlets_agent.add_tool(tool)
+#semantic search
+def semantic_search(query: str):
+
+    collection_name = "doqlets"
+
+    matches = vector_store.search(collection_name, query)
+
+    return {
+        "results": matches
+    }
 
 
-#-------------- Run Agent ------------------------------
-
-agent_response = doqlets_agent.run_agent({
-    "task_description": "What is ChatGPT?",
-    "task_context":""
+rag_agent.add_tool({
+    "name": "semantic_search",
+    "description": "Search the documents using semantic search using an embedding model and vector store",
+    "inputs": [
+        {
+            "name": "query",
+            "type": "string",
+            "description": "The query to search for"
+        }
+    ],
+    "outputs": [
+        {
+            "name": "results",
+            "type": "array",
+            "description": "The results of the semantic search"
+        }
+    ],
+    "function": semantic_search
 })

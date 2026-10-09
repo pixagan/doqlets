@@ -100,33 +100,6 @@ mergeSearchResultsNode.set_function("merge_search_results", merge_search_results
 
 
 
-# query_responder_llm = LLM("LLM", config={"api_key": api_key, "model":"gpt-5-mini"})
-# def answer_query(query: str, context: list):
-
-#     instructions = """
-#     You are a helpful assistant that can answer questions about the documents.
-#     You will be given a query and context chunks.
-#     You need to answer the query based on the context.
-#     DO NOT SPECULATE OR MAKE UP INFORMATION, USE ONLY THE INFORMATION PROVIDED TO ANSWER THE QUERY.
-#     IF NO CONTEXT IS PROVIDED, OR THE CONTEXT PROVIDED DOES NOT ANSWER THE QUERY, RESPOND WITH 'COULD NOT FIND RELEVANT INFORMATION.'
-#     RESPOND ONLY WITH THE ANSWER NOTING ELSE.
-#     """
-#     messages = [
-#         {
-#             "role": "developer",
-#             "content": instructions
-#         },
-#         {
-#             "role": "user",
-#             "content": f"Query: {query}\nContext: {context}"
-#         }
-#     ]
-#     output = query_responder_llm.call_llm(messages)
-#     answer = output['message'].content
-#     return {
-#         "answer": answer
-#     }
-
 
 
 

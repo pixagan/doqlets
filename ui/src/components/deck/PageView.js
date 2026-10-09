@@ -19,6 +19,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badge } from 'react-bootstrap'
 import axios from 'axios'
 import ContentCard from '../cards/ContentCard'
+import AddBlock from '../cards/AddBlock'
+import PageSettingsView from './PageSettingsView'
+import BlockView from '../cards/BlockView'
 
 const PageView = ({ page_id, page_title }) => {
 
@@ -29,19 +32,30 @@ const PageView = ({ page_id, page_title }) => {
     const [pageModel, setPageModel] = useState({})
     const [cards, setCards] = useState([])
 
-    const [viewMode, setViewMode] = useState('wiki') // wiki, pagemodel
+    const [viewMode, setViewMode] = useState('wiki') // content, addblock, pagesettings, blocksettings
 
 
-    const loadPageCards = async (page_id) => {
+    const loadPageBlocks = async (page_id) => {
         var config = {
             headers: {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.get(`/api/wiki/pages/${page_id}`, config)
+        const response = await axios.get(`/api/pages/${page_id}`, config)
         console.log("response ", response.data)
         setCards(response.data.cards)
         setPageModel(response.data.page_model)
+    }
+
+
+    const addBlockRequest = async (page_id) => {
+        var config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+        const response = await axios.post(`/api/pages/blocks/${page_id}`, config)
+        console.log("response ", response.data)
     }
     
 
@@ -50,7 +64,7 @@ const PageView = ({ page_id, page_title }) => {
 
         console.log("cards ", cards)
         if (page_id != null) {
-            loadPageCards(page_id)
+            loadPageBlocks(page_id)
         }
     }, [page_id])
 
@@ -59,30 +73,65 @@ const PageView = ({ page_id, page_title }) => {
         <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None'}}>
 
 
-            {page_id == null && (
+            {page_id == null ? (
                 <>
                  <p className='h4'>Select a page from the Menu on the left</p>
                  <p className='h4'>To add data, click the Docs Tab and use the Add Data Form.</p>
                 </>
                
+            ): (
+                <>
+                
+            <ListGroup horizontal>
+                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>setViewMode('content')}>Content</ListGroup.Item>
+                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>setViewMode('addblock')}>Add Block</ListGroup.Item>
+                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>setViewMode('pagesettings')}>Page Settings</ListGroup.Item>
+                
+            </ListGroup>
+
+            <Row>
+                <Col>
+
+                <p className='h4'>{pageModel && pageModel.title}</p>
+
+                    <br />
+
+
+                    {cards.map((card, index)=>(
+                    <BlockView page_id={page_id} card={card} />
+
+                    ))}
+                
+                </Col>
+
+                {viewMode == "addblock" && (
+                    <Col>
+                        <AddBlock page_id={page_id} addBlockRequest={addBlockRequest} />
+                                    
+                            
+                    </Col>
+                )}
+
+                {viewMode == "pagesettings" && (
+                    <Col>
+                            <PageSettingsView project_id={""} page_id={page_id} page_title={page_title} />
+                                    
+                            
+                    </Col>
+                )}
+               
+            </Row>
+
+           
+
+
+
+          
+                
+                </>
             )}
 
-            {/* <ListGroup horizontal>
-                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}}>View</ListGroup.Item>
-                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}}>Config</ListGroup.Item>
-            </ListGroup> */}
-
-             <p className='h4'>{pageModel && pageModel.title}</p>
-
-             <br />
-
-
-            {cards.map((card, index)=>(
-                <ContentCard page_id={page_id} card={card} />
-            
-            ))}
-               
-                
+        
 
                 
         </div>
