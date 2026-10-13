@@ -46,7 +46,7 @@ const ChatCard = ({ project_id }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post('/api/chat', { query }, config)
+        const response = await axios.post(`/api/chat/${project_id}`, { query }, config)
         const answer = response.data.answer
 
         //console.log("query ", query)
@@ -58,7 +58,7 @@ const ChatCard = ({ project_id }) => {
 
 
     const loadHistory = async () => {
-        const response = await axios.get('/api/chat')
+        const response = await axios.get(`/api/chat/${project_id}`)
         const history = response.data.chats
         console.log("history ", history)
         setChatHistory(history)

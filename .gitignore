@@ -15,6 +15,7 @@
 /doqlets/TestAddBlock.py
 /doqlets/TestDocToBlock.py
 /doqlets/FlowUpdateBlock.py
+/doqlets/TestAddDocument.py
 
 # macOS
 .DS_Store

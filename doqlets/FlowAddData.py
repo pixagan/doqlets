@@ -267,7 +267,7 @@ tagCardsNode.set_function("tag_cards", tag_cards, {}, tagCardsNode_inputs, tagCa
 
 
 
-def merge_cards_to_tags(cards, tag_cards):
+def merge_cards_to_tags(cards, tag_cards, project_id, document_id):
     print("Merge cards to pages")
 
     for card in cards:
@@ -279,6 +279,8 @@ def merge_cards_to_tags(cards, tag_cards):
         card["page"] = page
         card["tags"] = tags
         card["connections"] = connections
+        card["project_id"] = project_id
+        card["document_id"] = document_id
 
     return {
         "merged_cards":cards
@@ -459,6 +461,8 @@ dataToCardsFlow.add_data_source("TagCards|tag_cards|pages", "LoadPages|load_page
 
 dataToCardsFlow.add_data_source("MergeCardsToTags|merge_cards_to_tags|cards", "DataToCards|data_to_cards|cards")
 dataToCardsFlow.add_data_source("MergeCardsToTags|merge_cards_to_tags|tag_cards", "TagCards|tag_cards|tag_cards")
+dataToCardsFlow.add_data_source("MergeCardsToTags|merge_cards_to_tags|project_id", "INPUTS|project_id")
+dataToCardsFlow.add_data_source("MergeCardsToTags|merge_cards_to_tags|document_id", "INPUTS|document_id")
 
 dataToCardsFlow.add_data_source("PushCardsToDB|push_cards_to_db|cards", "MergeCardsToTags|merge_cards_to_tags|merged_cards")
 

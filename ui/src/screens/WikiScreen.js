@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Container, Card, Form, Button, ListGroup, OverlayTrigger, Popover, Tooltip, Carousel, InputGroup, FormControl, Table, Badge } from 'react-bootstrap'
 import Meta from '../components/Meta'
 import axios from 'axios'
+import { useParams } from 'react-router-dom'
 
 import {
     BrowserView,
@@ -47,6 +48,8 @@ export const WikiScreen = ({match, history}) => {
 
     const navigate = useNavigate();
 
+    const {project_id} = useParams();
+
     const [pageTitle, setPageTitle] = useState('')
 
     const [sectionType, setSectionType] = useState("all") 
@@ -57,7 +60,7 @@ export const WikiScreen = ({match, history}) => {
     const [chatHistory, setChatHistory] = useState([])
     const [docPages, setDocPages] = useState([])
 
-    const [project_id, setProjectId] = useState(null)
+    //const [project_id, setProjectId] = useState(null)
     
     
 

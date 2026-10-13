@@ -52,7 +52,7 @@ const AddWikiPage = ({ project_id, callBackAddData, setAddPageRequest }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post('/api/pages', { title: title, description:description, pageRules:pageRules }, config)
+        const response = await axios.post(`/api/pages/${project_id}`, { title: title, description:description, pageRules:pageRules }, config)
         console.log("response ", response)
         //setPages([...pages, response.data.page])
 
@@ -74,7 +74,7 @@ const AddWikiPage = ({ project_id, callBackAddData, setAddPageRequest }) => {
 
             <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None'}}>
 
-                <Button style={{textAlign:'left'}}>Add Page</Button>
+                <Button style={{textAlign:'left'}} onClick={()=>addPage()}>Add Page</Button>
         
                 <Form.Control type="text" placeholder="Enter title" value={title} onChange={(e) => setTitle(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
                 <Form.Control as="textarea" rows={5} placeholder="Description (what the page is about)" value={description} onChange={(e) => setDescription(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>

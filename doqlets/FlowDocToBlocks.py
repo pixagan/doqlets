@@ -65,12 +65,12 @@ def extract_doc_search_criteron(cards):
     index = 0
     for card in cards:
         card_info.append({
-            "card_id": card["_id"],
+            "card_id": str(card["_id"]),
             "card_type": card["card_type"],
             "card_keypoints": card["keypoints"]
         })
 
-        card_dict[card["_id"]] = index
+        card_dict[str(card["_id"])] = index
         index = index + 1
 
 
@@ -118,6 +118,9 @@ def load_relevant_blocks():
     #for page in page merge
 
     blocks_rules = db.load_documents("block_rules",{})
+    for block in blocks_rules:
+        block["_id"]= str(block["_id"])
+    
 
 
     return {

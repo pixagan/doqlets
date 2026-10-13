@@ -50,7 +50,7 @@ export const ProjectsScreen = ({match, history}) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post('/api/projects', { projectName: projectName }, config)
+        const response = await axios.post('/api/projects', { name: projectName }, config)
         
         const added_project = response.data.project
 
@@ -93,11 +93,17 @@ export const ProjectsScreen = ({match, history}) => {
 
             <hr />
 
+            <ListGroup>
             {projects.map((project, index)=>(
-                <div key={index} style={{borderBottom: '1px solid #dee2e6'}} onClick={()=>navigateToProject(project._id)}>
-                    <p className='text-left h4'>{project.name}</p>
-                </div>
+                <ListGroup.Item onClick={()=>navigateToProject(project._id)}>
+                    <p className='text-left h4' key={index}>{project.name}</p>
+                </ListGroup.Item>
+               
             ))}
+
+            </ListGroup>
+
+           
 
             </Container>
            

@@ -30,6 +30,7 @@ const AddBlock = ({ page_id, addBlockRequest }) => {
     const [blockTitle, setBlockTitle] = useState('')
     const [blockDefinition, setBlockDefinition] = useState('')
     const [blockRules, setBlockRules] = useState('')
+    const [blocktypes, setBlockTypes] = useState(["paragraph", "table", "list"])
 
    
     const createBlock = () => {
@@ -59,8 +60,20 @@ const AddBlock = ({ page_id, addBlockRequest }) => {
             
             <Card style={{border:'None', margin:'5px', padding:'5px'}}>
                 <Form.Control type="text" placeholder="Enter title (required)" value={blockTitle} onChange={(e) => setBlockTitle(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
-                <Form.Control as="textarea" rows={20} placeholder="Block Definition : What the block should contain" value={blockDefinition} onChange={(e) => setBlockDefinition(e.target.value)} onInput={resizeTextarea} ref={textareaRef}/>
-                <Form.Control as="textarea" rows={20} placeholder="Block Rules : Formatting requests, etc." value={blockRules} onChange={(e) => setBlockRules(e.target.value)} onInput={resizeTextarea} ref={textareaRef}/>
+
+                 <Form.Select aria-label="Block Type" value={blockType} onChange={(e)=>setBlockType(e.target.value)} style={{marginBottom:'10px'}}>
+
+                <option value="">Select Block type</option>
+                {blocktypes.map((skill, index)=>(
+                  <option key={index} value={skill}>{skill}</option>
+                ))}
+              </Form.Select>
+
+
+                <Form.Control as="textarea" rows={5} placeholder="Block Definition : What the block should contain" value={blockDefinition} onChange={(e) => setBlockDefinition(e.target.value)} onInput={resizeTextarea} ref={textareaRef} style={{marginBottom:"10px"}}/>
+                
+                <Form.Control as="textarea" rows={5} placeholder="Block Rules : Formatting requests, etc." value={blockRules} onChange={(e) => setBlockRules(e.target.value)} onInput={resizeTextarea} ref={textareaRef} style={{marginBottom:"10px"}}/>
+
                 <Button variant="primary" onClick={()=>createBlock()}>Create Block</Button>
 
             </Card>

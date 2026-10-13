@@ -56,11 +56,11 @@ const PageSettingsView = ({ project_id, page_id, page_title }) => {
 
     return (
 
-        <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None'}}>
+        <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None', margin:'2px'}}>
 
-           <p>Page Description</p>
+           <p className='h4'>Page Description</p>
 
-           <p>Page Rules</p>
+           <p className='h4'>Page Rules</p>
 
                 
         </div>

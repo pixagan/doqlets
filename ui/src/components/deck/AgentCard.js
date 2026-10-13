@@ -67,7 +67,7 @@ const AgentCard = ({ project_id }) => {
         console.log("selectedSkill ", selectedSkill)
         //console.log("selectedSkill['name'] ", selectedSkill["name"])
         console.log("query ", query)
-        const response = await axios.post('/api/agents', { skill: selectedSkill, task: query }, config)
+        const response = await axios.post(`/api/agents/${project_id}`, { skill: selectedSkill, task: query }, config)
         const answer = response.data.task_response
 
         console.log("response ", answer.toString())
@@ -78,7 +78,7 @@ const AgentCard = ({ project_id }) => {
 
 
     const loadHistory = async () => {
-        const response = await axios.get('/api/agents')
+        const response = await axios.get(`/api/agents/${project_id}`)
         const history = response.data.tasks
         console.log("history ", history)
         setChatHistory(history)

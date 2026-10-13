@@ -59,7 +59,7 @@ const WikiView = ({ project_id }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post('/api/pages', { title: pageTitle }, config)
+        const response = await axios.post(`/api/pages/${project_id}`, { title: pageTitle }, config)
         console.log("response ", response)
         setPages([...pages, response.data.page])
     }
@@ -71,7 +71,7 @@ const WikiView = ({ project_id }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.get(`/api/pages`, config)
+        const response = await axios.get(`/api/pages/${project_id}`, config)
         console.log("response ", response)
         setPages(response.data.pages)
     }

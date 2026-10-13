@@ -21,7 +21,11 @@ import axios from 'axios'
 
 import { MarkdownView } from '../cards/MarkdownView'
 
-const BlockView = ({ page_id, card}) => {
+import { Settings, Workflow } from 'lucide-react'
+
+
+
+const BlockView = ({ page_id, card, blockSettingsView}) => {
 
     const dispatch = useDispatch()
 
@@ -41,6 +45,10 @@ const BlockView = ({ page_id, card}) => {
         
     }
 
+    const toggleBlockSettingsView = () => {
+        blockSettingsView(card._id, card.title)
+    }
+
     const textareaRef = useRef(null)
 
 
@@ -56,8 +64,10 @@ const BlockView = ({ page_id, card}) => {
 
             
             <Card style={{border:'None', margin:'5px', padding:'5px'}}>
-                <Card.Header style={{border:'None', textAlign:'left', fontWeight:'bold'}} onClick={()=>toggleViewSettings()}>
-                    {card.title}
+                <Card.Header style={{border:'None', textAlign:'left', fontWeight:'bold'}}>
+                    {card.title} | 
+                    <Badge bg='light' onClick={()=>toggleBlockSettingsView()}> <Settings /> </Badge>
+                    <Badge bg='light' onClick={()=>toggleViewSettings()}> <Workflow /> </Badge>
                 </Card.Header>
                  <Card.Body style={{border:'None', textAlign:'left'}}>
                     {/* {card.content} */}

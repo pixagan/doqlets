@@ -22,8 +22,9 @@ import ContentCard from '../cards/ContentCard'
 import AddBlock from '../cards/AddBlock'
 import PageSettingsView from './PageSettingsView'
 import BlockView from '../cards/BlockView'
+import BlockSettingsView from '../cards/BlockSettingsView'
 
-const PageView = ({ page_id, page_title }) => {
+const PageView = ({ project_id, page_id, page_title }) => {
 
     const dispatch = useDispatch()
 
@@ -31,8 +32,28 @@ const PageView = ({ page_id, page_title }) => {
     const [pageTitle, setPageTitle] = useState('Page')
     const [pageModel, setPageModel] = useState({})
     const [cards, setCards] = useState([])
+    const [selectedCard, setSelectedCard] = useState("")
+    const [selectedCardTitle, setSelectedCardTitle] = useState("")
 
-    const [viewMode, setViewMode] = useState('wiki') // content, addblock, pagesettings, blocksettings
+    const [viewMode, setViewMode] = useState('content') // content, addblock, pagesettings, blocksettings
+
+    const toggleViewMode = (mode_in) => {
+
+        if(mode_in == viewMode){
+            setViewMode('content')
+        }else{
+            setViewMode(mode_in)
+        }
+
+    }
+
+    const toggleBlockSettingsView = (card_id, title) => {
+ 
+        setSelectedCard(card_id)
+        setSelectedCardTitle(title)
+        toggleViewMode('blocksettings')
+
+    }
 
 
     const loadPageBlocks = async (page_id) => {
@@ -41,7 +62,7 @@ const PageView = ({ page_id, page_title }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.get(`/api/pages/${page_id}`, config)
+        const response = await axios.get(`/api/pages/${project_id}/${page_id}`, config)
         console.log("response ", response.data)
         setCards(response.data.cards)
         setPageModel(response.data.page_model)
@@ -54,7 +75,7 @@ const PageView = ({ page_id, page_title }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post(`/api/pages/blocks/${page_id}`, config)
+        const response = await axios.post(`/api/pages/blocks/${project_id}/${page_id}`, config)
         console.log("response ", response.data)
     }
     
@@ -83,22 +104,24 @@ const PageView = ({ page_id, page_title }) => {
                 <>
                 
             <ListGroup horizontal>
-                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>setViewMode('content')}>Content</ListGroup.Item>
-                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>setViewMode('addblock')}>Add Block</ListGroup.Item>
-                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>setViewMode('pagesettings')}>Page Settings</ListGroup.Item>
+                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>toggleViewMode('content')}>Content</ListGroup.Item>
+                <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>toggleViewMode('addblock')}>Add Block</ListGroup.Item>
+               {/*} <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}} onClick={()=>toggleViewMode('pagesettings')}>Page Settings</ListGroup.Item> */}
                 
             </ListGroup>
 
             <Row>
-                <Col>
+                <Col style={{"overflow-x":'scroll', minHeight:'95vh'}}>
+
+                <hr />
 
                 <p className='h4'>{pageModel && pageModel.title}</p>
 
-                    <br />
+                    
 
 
                     {cards.map((card, index)=>(
-                    <BlockView page_id={page_id} card={card} />
+                    <BlockView project_id={project_id} page_id={page_id} card={card} blockSettingsView={toggleBlockSettingsView}/>
 
                     ))}
                 
@@ -114,7 +137,17 @@ const PageView = ({ page_id, page_title }) => {
 
                 {viewMode == "pagesettings" && (
                     <Col>
-                            <PageSettingsView project_id={""} page_id={page_id} page_title={page_title} />
+                            <PageSettingsView project_id={project_id} page_id={page_id} page_title={page_title} />
+                                    
+                            
+                    </Col>
+                )}
+
+                {viewMode == "blocksettings" && (
+                    <Col>
+                            
+
+                            <BlockSettingsView project_id={project_id} card_id={selectedCard} title={selectedCardTitle} page_id={page_id}/>
                                     
                             
                     </Col>

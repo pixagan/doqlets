@@ -41,6 +41,7 @@ from laeyerz.flow.Flow import Flow
 from laeyerz.flow.Node import Node
 
 from nodes.MongoNode import MongoNode
+from nodes.ChromaNode import ChromaNode
 
 from Skilllist import skillist
 from ActionLog import ActionLog
@@ -51,6 +52,9 @@ from FlowAddData import dataToCardsFlow
 #from FlowDocumentLoader import docloader_flow
 #from FileLoaderFlow import fileloader_flow
 
+from FlowDocToBlocks import addToPagesFlow
+from FlowDocToCards import docToCardsFlow
+
 #Search and Chat
 from FlowSearch import searchFlow
 from FlowChat import chatFlow
@@ -59,7 +63,8 @@ from FlowChat import chatFlow
 from DoqletsAgentManager import DoqletsAgentManager
 
 
-
+class ProjectCreate(BaseModel):
+    name: str
 
 class ChatInput(BaseModel):
     query: str
@@ -113,6 +118,8 @@ class DoqletsApp:
 
         self.db = MongoNode("DoqletsDB", config={"MONGO_URI": self.km["MONGO_URI"], "MONGO_DB": self.km["MONGO_DB"]})
 
+        self.vstore = ChromaNode("ChromaNode", config={"db_path": self.km["CHROMA_PATH"]})
+
 
         self.d2c_flow        = dataToCardsFlow
         #self.doc_loader_flow = docloader_flow
@@ -122,6 +129,9 @@ class DoqletsApp:
 
         self.search_flow = searchFlow
         self.chat_flow   = chatFlow
+
+        self.addToBlockFlow = addToPagesFlow
+        self.docToCardsFlow = docToCardsFlow
 
         self.action_log = ActionLog()
         self.agent_manager = DoqletsAgentManager()
@@ -148,22 +158,43 @@ class DoqletsApp:
             return {"projects": projects}
 
 
+        @self.api.post("/api/projects")
+        async def create_project(project_create:ProjectCreate):
+
+            project_name = project_create.name.strip().lower()
+            collection_name = dq + "_" + project_name
+
+            created_project = self.db.create_document("projects", {"name": project_create.name, "collection_name":collection_name})
+
+
+            self.vstore.create_get_collection(collection_name)
+            
+
+            new_project = {
+                "name": project_create.name,
+                "_id": str(created_project.inserted_id),
+            }
+
+
+            
+
+            return {"project": new_project}
 
 
     #--------------------Documents -------------------------------------------------
 
-        @self.api.get("/api/documents")
-        async def load_documents():
+        @self.api.get("/api/documents/{project_id}")
+        async def load_documents(project_id: str):
 
-            documents = self.db.load_documents("documents", {})
+            documents = self.db.load_documents("documents", {"project_id":project_id})
             for document in documents:
                 document["_id"] = str(document["_id"])
             return {"documents": documents}
 
 
 
-        @self.api.get("/api/documents/{doc_id}")
-        async def load_document(doc_id: str):
+        @self.api.get("/api/documents/{project_id}/{doc_id}")
+        async def load_document(project_id: str, doc_id: str):
 
             doc      = self.db.load_document_id("documents", doc_id)
 
@@ -180,8 +211,8 @@ class DoqletsApp:
             return {"document": document}
 
 
-        @self.api.get("/api/documents/cards/{page_uid}")
-        async def load_page_cards(page_uid: str):
+        @self.api.get("/api/documents/cards/{project_id}/{page_uid}")
+        async def load_page_cards(project_id: str, page_uid: str):
             cards = self.db.load_documents("cards", {"page":page_uid})
             for card in cards:  
                 card["_id"] = str(card["_id"])
@@ -193,8 +224,8 @@ class DoqletsApp:
 
 
 
-        @self.api.post("/api/documents/text")
-        async def add_data(data_in:DataInput):
+        @self.api.post("/api/documents/text/{project_id}")
+        async def add_data(project_id: str, data_in:DataInput):
 
             data  = data_in.data
             title = data_in.title
@@ -208,7 +239,7 @@ class DoqletsApp:
 
 
             new_document = {
-                "project_id":"",
+                "project_id":project_id,
                 "title": title,
                 "source": "db",   #db, file, cloud, web.
                 "doc_id": str(created_document.inserted_id),
@@ -217,21 +248,41 @@ class DoqletsApp:
 
             created_doc = self.db.create_document("documents", new_document)
 
+            doc_id = str(created_doc.inserted_id)
+
 
             #flow_response = self.doc_loader_flow.run({"data": data})
 
-            flow_response = self.d2c_flow.run({"data": data})
+            #flow_response = self.d2c_flow.run({"data": data, "project_id": project_id, "document_id":doc_id})
+
+            flow_response = self.docToCardsFlow.run({
+                "data": data,
+                "project_id": project_id,
+                "document_id": doc_id
+            })
 
             cards = flow_response["outputs"]["MergeCardsToTags|merge_cards_to_tags|merged_cards"]
 
             card_ids = [card["_id"] for card in cards]
 
+
+
+
             self.action_log.add_item("adding_data", "Adding data as text directly to database", {"card_ids": card_ids})
+
+            inputs = {
+                "cards": cards
+            }
+
+            flow_res = addToPagesFlow.run(inputs)
+            print("Flow Res : ", flow_res)
+
+            merge_requests = flow_res["outputs"]["MergeBlocks|merge_blocks|merge_summary"]
 
 
 
             return_doc = {
-                "project_id":"",
+                "project_id":project_id,
                 "title": title,
                 "source": "db",   #db, file, cloud, web.
                 "doc_id": str(created_document.inserted_id),
@@ -249,8 +300,8 @@ class DoqletsApp:
             return {"document": return_doc}
 
 
-        @self.api.post("/api/documents/file")
-        async def store_pdf(file: UploadFile = File(...)):
+        @self.api.post("/api/documents/file/{project_id}")
+        async def store_pdf(project_id: str, file: UploadFile = File(...)):
 
             file_content = await file.read()
             #self.store_flow.run({"file": file_content})
@@ -266,7 +317,7 @@ class DoqletsApp:
             created_document = self.db.create_document("document_data", doc)
 
             new_document = {
-                "project_id":"",
+                "project_id":project_id,
                 "title": title,
                 "source": "file",   #db, file, cloud, web.
                 "doc_id": str(created_document.inserted_id),
@@ -274,13 +325,29 @@ class DoqletsApp:
 
             created_doc = self.db.create_document("documents", new_document)
 
-            flow_response = self.d2c_flow.run({"data": data})
+            #flow_response = self.d2c_flow.run({"data": data})
+
+            flow_response = self.docToCardsFlow.run({
+                "data": data,
+                "project_id": project_id,
+                "document_id": doc_id
+            })
 
             print("Done with Flow")
 
             cards = flow_response["outputs"]["MergeCardsToTags|merge_cards_to_tags|merged_cards"]
 
             card_ids = [card["_id"] for card in cards]
+
+            inputs = {
+                "cards": cards
+            }
+
+            flow_res = addToPagesFlow.run(inputs)
+            print("Flow Res : ", flow_res)
+
+            merge_requests = flow_res["outputs"]["MergeBlocks|merge_blocks|merge_summary"]
+
 
 
     
@@ -290,8 +357,8 @@ class DoqletsApp:
 
 
 
-        @self.api.put("/api/documents/file")
-        async def update_doc(file: UploadFile = File(...)):
+        @self.api.put("/api/documents/file/{project_id}")
+        async def update_doc(project_id:str, file: UploadFile = File(...)):
 
             file_content = await file.read()
             #self.store_flow.run({"file": file_content})
@@ -299,7 +366,7 @@ class DoqletsApp:
             data = self.data_loader.load_pdf(file_content)
 
             new_document = {
-                "project_id":"",
+                "project_id":project_id,
                 "title": title,
                 "source": "file",   #db, file, cloud, web.
                 "doc_id": str(created_document.inserted_id),
@@ -314,42 +381,19 @@ class DoqletsApp:
         
 
 
-
-        #--------------------Wiki -------------------------------------------------
-
-#        @self.api.post("/api/wiki/store/text")
-#        async def add_data(data_in:DataInput):
-#
-#            data = data_in.data
-#
-#            flow_response = self.d2c_flow.run({"data": data})
-#
-#            cards = flow_response["outputs"]["MergeCardsToTags|merge_cards_to_tags|merged_cards"]
-#
-#            card_ids = [card["_id"] for card in cards]
-#
-#            #add cards to pages
-#
-#            self.action_log.add_item("adding_data", "Adding data as text directly to database", {"card_ids": card_ids})
-#
-#            return {"cards": merged_cards}
-
-
-
-
         # --- Pages --------
 
-        @self.api.get("/api/pages")
-        async def load_pages():
+        @self.api.get("/api/pages/{project_id}")
+        async def load_pages(project_id: str):
 
-            pages = self.db.load_documents("pages", {})
+            pages = self.db.load_documents("pages", {"project_id":project_id})
             for page in pages:
                 page["_id"] = str(page["_id"])
             return {"pages": pages}
 
 
-        @self.api.post("/api/pages")
-        async def add_page(page_create:PageCreate):
+        @self.api.post("/api/pages/{project_id}")
+        async def add_page(project_id: str, page_create:PageCreate):
 
             title = page_create.title
             description = page_create.description
@@ -360,6 +404,7 @@ class DoqletsApp:
             created_page = self.db.create_document("pages", {"title": title})
 
             page_rules = {
+                "project_id": project_id,
                 "page_id": str(created_page.inserted_id),
                 "description": description,
                 "rules": page_rules,
@@ -372,7 +417,7 @@ class DoqletsApp:
             new_page = {
                 "_id": str(created_page.inserted_id),
                 "title": title,
-                "page_description": page_description,
+                "page_description": description,
                 "uid": uid
             }
 
@@ -381,8 +426,8 @@ class DoqletsApp:
             return {"page": new_page}
 
 
-        @self.api.get("/api/pages/{page_uid}")
-        async def load_page(page_uid: str):
+        @self.api.get("/api/pages/{project_id}/{page_uid}")
+        async def load_page(project_id: str, page_uid: str):
             cards = self.db.load_documents("blocks", {"page_id":page_uid})
             for card in cards:  
                 card["_id"] = str(card["_id"])
@@ -399,14 +444,15 @@ class DoqletsApp:
 
         # --- Blocks --------
 
-        @self.api.post("/api/pages/blocks/{page_id}")
-        async def add_block(page_id: str, block_create:BlockCreate):
+        @self.api.post("/api/pages/blocks/{project_id}/{page_id}")
+        async def add_block(project_id: str, page_id: str, block_create:BlockCreate):
 
             title = block_create.title
             block_type = block_create.block_type
             rules = block_create.rules
 
             newBlock = {
+                "project_id":project_id,
                 "page_id":page_id,
                 "title":title,
                 "block_type":block_type,
@@ -419,10 +465,13 @@ class DoqletsApp:
             created_block = self.db.create_document("blocks", newBlock)
 
             newBlockRules = {
+                "project_id": project_id,
                 "title":title,
                 "block_id":str(created_block.inserted_id),
                 "rules":rules,
-                "type":block_type
+                "type":block_type,
+                "instructions":rules,
+                "context": context,
             }
 
             new_block = self.db.create_document("block_rules", newBlockRules)
@@ -434,23 +483,34 @@ class DoqletsApp:
 
 
 
-        @self.api.put("/api/pages/blocks/{page_uid}/block_id")
-        async def update_block(page_uid: str):
+        @self.api.put("/api/pages/blocks/{project_id}/{page_uid}/block_id")
+        async def update_block(project_id: str, page_uid: str):
 
             cblock = self.db.load_document_id("blocks", block_id)
 
             return {"block": cblock}
 
 
+        @self.api.get("/api/pages/blocks/{project_id}/{block_id}")
+        async def load_block_meta(project_id: str, block_id: str):
+
+            cblock_meta = self.db.load_document("block_rules", {"block_id":block_id})
+
+            print("Block ", cblock_meta)
+
+            cblock_meta["_id"] = str(cblock_meta["_id"])
+
+            return {"block": cblock_meta}
+
+
        #--------------------Search  / RAG -------------------------------------------------
 
 
-        @self.api.post("/api/search")
-        async def search_pages(search_in:SearchInput):
+        @self.api.post("/api/search/{project_id}")
+        async def search_pages(project_id:str, search_in:SearchInput):
 
             query = search_in.query
-            search_response = self.search_flow.run({"query": query})
-            #print("search_results ", search_response)
+            search_response = self.search_flow.run({"query": query, "project_id": project_id})
 
             search_results = search_response["outputs"]["MergeSearchResults|merge_search_results|merged_results"]
             print("search_results ", search_results)
@@ -460,11 +520,11 @@ class DoqletsApp:
             return {"search_results": search_results}
 
 
-        @self.api.post("/api/chat")
-        async def chat_pages(search_in:SearchInput):
+        @self.api.post("/api/chat/{project_id}")
+        async def chat_pages(project_id:str, search_in:SearchInput):
 
             query = search_in.query
-            chat_response = self.chat_flow.run({"query": query})
+            chat_response = self.chat_flow.run({"query": query, "project_id": project_id})
             #print("search_results ", search_response)
 
             answer = chat_response["outputs"]["AnswerQuery|answer_query|answer"]
@@ -475,8 +535,8 @@ class DoqletsApp:
             return {"answer": answer}
 
 
-        @self.api.get("/api/chat")
-        async def load_chat_history():
+        @self.api.get("/api/chat/{project_id}")
+        async def load_chat_history(project_id: str):
 
             chats = self.db.load_documents("chat", {})
             for chat in chats:
@@ -487,8 +547,8 @@ class DoqletsApp:
 
         #--------------- Tasks -------------------------------------------
 
-        @self.api.post("/api/agents")
-        async def run_task(task_in:AgentInput):
+        @self.api.post("/api/agents/{project_id}")
+        async def run_task(project_id:str, task_in:AgentInput):
 
             task_description  = task_in.task
             skill = task_in.skill
@@ -506,7 +566,7 @@ class DoqletsApp:
 
             print("running task ", skill, task_request)
 
-            task_response = self.agent_manager.run_task(skill, task_request)
+            task_response = self.agent_manager.run_task(skill, task_request, project_id)
             #print("search_results ", search_response)
             print("task_response ", task_response)
 
@@ -522,8 +582,8 @@ class DoqletsApp:
             return {"task_response": task_response}
 
 
-        @self.api.get("/api/agents")
-        async def get_agent_runs():
+        @self.api.get("/api/agents/{project_id}")
+        async def get_agent_runs(project_id: str):
 
             tasks = self.db.load_documents("task", {})
             for task in tasks:

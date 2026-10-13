@@ -34,7 +34,7 @@ const DocView = ({ project_id, doc_id }) => {
 
     const loadDoc = async () => {
         if (!doc_id) return
-        const response = await axios.get(`/api/documents/${doc_id}`)
+        const response = await axios.get(`/api/documents/${project_id}/${doc_id}`)
         console.log("response ", response)
         setDoc(response.data.document)
     }

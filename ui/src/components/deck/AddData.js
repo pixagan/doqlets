@@ -61,7 +61,7 @@ const AddData = ({ project_id, callBackAddData }) => {
 
     const uploadText = async () => {
         if (!text) return
-        const response = await axios.post('/api/documents/text', {title:title, data:text, related_pages:selectPage})
+        const response = await axios.post(`/api/documents/text/${project_id}`, {title:title, data:text})
         console.log("response ", response.data)
         callBackAddData(response.data.document)
     }
@@ -76,7 +76,7 @@ const AddData = ({ project_id, callBackAddData }) => {
         formData.append('file', selectedFile)   // must be 'file' to match backend
         formData.append('related_pages', selectPage)
         
-        const response = await axios.post('/api/documents/file', formData)
+        const response = await axios.post(`/api/documents/file/${project_id}`, formData)
         console.log("response ", response.data)
 
         callBackAddData(response.data.document)

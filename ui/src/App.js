@@ -42,7 +42,9 @@ const App = () => {
 
         <Routes>
 
-          <Route path='/' element={<WikiScreen />} exact />
+          <Route path='/' element={<ProjectsScreen />} exact />
+
+          <Route path='/wiki' element={<WikiScreen />} exact />
           <Route path='/projects' element={<ProjectsScreen />} exact />
           <Route path='/doqlets/:project_id' element={<WikiScreen />} exact />
       

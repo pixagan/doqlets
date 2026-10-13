@@ -48,7 +48,7 @@ const SearchCard = ({ project_id }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post('/api/search', { query }, config)
+        const response = await axios.post(`/api/search/${project_id}`, { query }, config)
         const search_results = response.data.search_results
 
         //console.log("query ", query)
@@ -60,7 +60,7 @@ const SearchCard = ({ project_id }) => {
     }
 
     const loadHistory = async () => {
-        const response = await axios.get('/api/history')
+        const response = await axios.get(`/api/history/${project_id}`)
         const history = response.data.chats
         console.log("history ", history)
         setChatHistory(history)

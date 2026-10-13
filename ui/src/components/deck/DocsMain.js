@@ -45,7 +45,7 @@ const DocsMain = ({ project_id }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.post('/api/pages', { title: pageTitle }, config)
+        const response = await axios.post(`/api/pages/${project_id}`, { title: pageTitle }, config)
         console.log("response ", response)
         setDocs([...docs, response.data.page])
     }
@@ -64,7 +64,7 @@ const DocsMain = ({ project_id }) => {
                 'Content-Type': 'application/json'
             }
         }
-        const response = await axios.get(`/api/documents`, config)
+        const response = await axios.get(`/api/documents/${project_id}`, config)
         console.log("response ", response)
         setDocs(response.data.documents)
     }

@@ -111,7 +111,7 @@ class DoqletsAgentManager:
 
 
 
-    def run_task(self, skill, task, write_to_file=False):
+    def run_task(self, skill, task, project_id, write_to_file=False):
 
         print("Loading Skill Instructions for ", skill)
         skill_instructions = self.load_skill(skill)
