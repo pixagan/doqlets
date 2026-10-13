@@ -116,12 +116,12 @@ const AgentCard = ({ project_id }) => {
                   <option key={index} value={skill.name}>{skill.name}</option>
                 ))}
               </Form.Select>
-              <Button variant="primary" onClick={()=>chatRequest()} style={{textAlign:'left'}}>Run</Button>
+              <Button variant="primary" style={{backgroundColor:'blue', borderRadius:'10px'}} onClick={()=>chatRequest()} style={{textAlign:'left'}}>Run</Button>
             </InputGroup>
 
             <br />
            
-            <Form.Control as="textarea" rows={5} placeholder="Enter your query" value={query} onChange={(e)=>setQuery(e.target.value)} className="mb-2"/>
+            <Form.Control as="textarea" rows={5} placeholder="Enter your task" value={query} onChange={(e)=>setQuery(e.target.value)} className="mb-2"/>
                 
             
             

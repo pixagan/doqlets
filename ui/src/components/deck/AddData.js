@@ -118,7 +118,7 @@ const AddData = ({ project_id, callBackAddData }) => {
             </ListGroup>
 
            
-            <Form.Control type="text" placeholder="Manually select Pages to update to using @PageName1, @PageName2, etc." value={selectPage} onChange={(e) => setSelectPage(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
+        {/* <Form.Control type="text" placeholder="Manually select Pages to update to using @PageName1, @PageName2, etc." value={selectPage} onChange={(e) => setSelectPage(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/> */}
 
 
             {selectedType === 'text' && (

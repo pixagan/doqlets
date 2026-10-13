@@ -121,7 +121,7 @@ const WikiView = ({ project_id }) => {
                     
 
               {pages && pages.map((page, index)=>(
-                <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold'}} onClick={()=>selectPage(page._id, page.uid, page.title)} active={page_id === page.uid}>
+                <ListGroup.Item key={index} className='text-left' style={{fontWeight:'bold', backgroundColor:selectedPage == page._id ? '#dadfe0' : 'white'}} onClick={()=>selectPage(page._id, page.uid, page.title)} active={page_id === page.uid}>
                 {page.title}
                 </ListGroup.Item>
              ))}

@@ -78,6 +78,10 @@ const PageView = ({ project_id, page_id, page_title }) => {
         const response = await axios.post(`/api/pages/blocks/${project_id}/${page_id}`, config)
         console.log("response ", response.data)
     }
+
+    const updatePageBlockList = (newCard) => {
+        setCards([newCard, ...cards])
+    }
     
 
 
@@ -129,7 +133,7 @@ const PageView = ({ project_id, page_id, page_title }) => {
 
                 {viewMode == "addblock" && (
                     <Col>
-                        <AddBlock page_id={page_id} addBlockRequest={addBlockRequest} />
+                        <AddBlock project_id={project_id} page_id={page_id} addBlockRequest={updatePageBlockList} />
                                     
                             
                     </Col>

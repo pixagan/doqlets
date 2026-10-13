@@ -89,6 +89,7 @@ class BlockCreate(BaseModel):
     title: str
     block_type: str
     rules: str
+    context: str
 
 
 class DoqletsApp:
@@ -450,6 +451,9 @@ class DoqletsApp:
             title = block_create.title
             block_type = block_create.block_type
             rules = block_create.rules
+            context = block_create.context
+
+            print("New Block ", title, block_type, rules, context)
 
             newBlock = {
                 "project_id":project_id,
@@ -474,10 +478,10 @@ class DoqletsApp:
                 "context": context,
             }
 
-            new_block = self.db.create_document("block_rules", newBlockRules)
+            created_rules = self.db.create_document("block_rules", newBlockRules)
 
-            new_block["_id"] = str(created_block.inserted_id)
-            return {"block": new_block}
+            newBlock["_id"] = str(created_block.inserted_id)
+            return {"block": newBlock}
 
 
 

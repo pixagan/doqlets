@@ -90,7 +90,7 @@ const SearchCard = ({ project_id }) => {
 
             <InputGroup>
                 <Form.Control as="textarea" rows={5} placeholder="Enter your query" value={query} onChange={(e)=>setQuery(e.target.value)} className="mb-2"/>
-                <Button variant="primary" onClick={()=>searchRequest()}>Chat</Button>
+                <Button variant="primary" style={{width:'80%', backgroundColor:'blue', borderRadius:'10px'}} onClick={()=>searchRequest()}>Chat</Button>
             </InputGroup>
 
 

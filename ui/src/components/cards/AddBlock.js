@@ -20,7 +20,7 @@ import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badg
 import axios from 'axios'
 
 
-const AddBlock = ({ page_id, addBlockRequest }) => {
+const AddBlock = ({ project_id, page_id, addBlockRequest }) => {
 
     const dispatch = useDispatch()
 
@@ -33,9 +33,24 @@ const AddBlock = ({ page_id, addBlockRequest }) => {
     const [blocktypes, setBlockTypes] = useState(["paragraph", "table", "list"])
 
    
-    const createBlock = () => {
+    const createBlock = async() => {
 
-      
+        var config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+
+        var newBlock = {
+            "title":blockTitle,
+            "block_type":blockType,
+            "rules":blockRules,
+            "context":blockDefinition,
+        }
+
+        const response = await axios.post(`/api/pages/blocks/${project_id}/${page_id}`, newBlock, config)
+        console.log("response ", response.data)
+        //addBlockRequest(response.data.block)
         
     }
 
