@@ -163,7 +163,7 @@ class DoqletsApp:
         async def create_project(project_create:ProjectCreate):
 
             project_name = project_create.name.strip().lower()
-            collection_name = dq + "_" + project_name
+            collection_name = "dq" + "_" + project_name
 
             created_project = self.db.create_document("projects", {"name": project_create.name, "collection_name":collection_name})
 
@@ -402,7 +402,7 @@ class DoqletsApp:
 
             uid = title.strip().replace(" ", "_").lower()
 
-            created_page = self.db.create_document("pages", {"title": title})
+            created_page = self.db.create_document("pages", {"project_id":project_id, "title": title})
 
             page_rules = {
                 "project_id": project_id,

@@ -255,38 +255,40 @@ def merge_blocks(cards, card_dict, merge_requests):
 
     for req in merge_requests:
 
-        rel_cards = []
-        for cid in req["relevant_cards"]:
-            ccard = {
-                "content":cards[card_dict[cid]]["content"]
+        if(len(req["relevant_cards"]) > 0):
+
+            rel_cards = []
+            for cid in req["relevant_cards"]:
+                ccard = {
+                    "content":cards[card_dict[cid]]["content"]
+                }
+                rel_cards.append(ccard)
+
+                
+            block_id = req["block"]
+            cblock = db.load_document_id("blocks", block_id)
+
+            merge_inputs = {
+                "cards":rel_cards,
+                "block":cblock
             }
-            rel_cards.append(ccard)
 
-            
-        block_id = req["block"]
-        cblock = db.load_document_id("blocks", block_id)
+            agent_response = block_update_agent.run_agent(merge_inputs)
 
-        merge_inputs = {
-            "cards":rel_cards,
-            "block":cblock
-        }
+            updated_block = agent_response["outputs"]["output"]
 
-        agent_response = block_update_agent.run_agent(merge_inputs)
+            updated_block = json.loads(updated_block)
 
-        updated_block = agent_response["outputs"]["output"]
+            cblock["content"] = updated_block["content"]
 
-        updated_block = json.loads(updated_block)
+            merge_summary.append({
+                "block_id":block_id,
+                "block_updated":updated_block["block_updated"],
+                "changes_made":updated_block["changes_made"],
+                "cards_merged":req["relevant_cards"]
+            })
 
-        cblock["content"] = updated_block["content"]
-
-        merge_summary.append({
-            "block_id":block_id,
-            "block_updated":updated_block["block_updated"],
-            "changes_made":updated_block["changes_made"],
-            "cards_merged":req["relevant_cards"]
-        })
-
-        db.update_document_id("blocks", block_id, cblock)
+            db.update_document_id("blocks", block_id, cblock)
 
 
     return {
