@@ -31,16 +31,12 @@ import {
 
   import { useNavigate } from 'react-router-dom';
 
-//   import PageView from '../components/deck/PageView'
   import WikiView from '../components/deck/WikiView'
-//   import DataView from '../components/deck/DataView'
-//   import AddData from '../components/deck/AddData'
   import ChatCard from '../components/deck/ChatCard'
   import SearchCard from '../components/deck/SearchCard'
   import AgentCard from '../components/deck/AgentCard'
-//   import ProjectModel from '../components/deck/ProjectModel'
-//   import DocView from '../components/deck/DocView'
   import DocsMain from '../components/deck/DocsMain'
+  import UsageModel from '../components/deck/CostModel'
   
 export const WikiScreen = ({match, history}) => {
 
@@ -102,6 +98,9 @@ export const WikiScreen = ({match, history}) => {
                 </ListGroup.Item>
                 <ListGroup.Item onClick={()=>setRightView("agents")} active={rightView === "agents"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Agents
+                </ListGroup.Item>
+                <ListGroup.Item onClick={()=>setRightView("usage")} active={rightView === "usage"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
+                    Usage
                 </ListGroup.Item>
                
                
@@ -166,6 +165,11 @@ export const WikiScreen = ({match, history}) => {
             {rightView === "docs" && (
                 <DocsMain project_id={project_id} />
               
+            )}
+
+
+            {rightView == "usage" && (
+                <UsageModel project_id={project_id} />
             )}
 
 

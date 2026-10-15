@@ -63,7 +63,6 @@ BM25 Keyword Search Tool - queries a BM25 database
 Query Reworder Tool - Rewording the user query to imporve Semantic Search Hits
 Answer Drafter - Generating the answer based on the query and the chunks
 
-
 """
 
 

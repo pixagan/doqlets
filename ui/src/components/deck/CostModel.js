@@ -1,0 +1,97 @@
+// Copyright 2026 Pixagan Technologies
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import React, { useState, useEffect, Fragment, useRef } from 'react'
+import PropTypes from 'prop-types'
+import {Alert} from 'react-bootstrap'
+import { useDispatch, useSelector } from 'react-redux'
+import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badge } from 'react-bootstrap'
+import axios from 'axios'
+
+
+const UsageModel = ({ project_id }) => {
+
+    const dispatch = useDispatch()
+
+    const [usageModel, setUsageModel] = useState({
+        "models":{
+            "GPT-5.1":{
+                "model":"GPT-5.1",
+                "inputs":"200",
+                "outputs":"10"
+            }
+        }
+    })
+
+    const loadCostModel = async () => {
+        const response = await axios.get(`/api/usage/${project_id}`)
+        console.log("response ", response)
+        setUsageModel(response.data.usage_model)
+    }
+    
+
+
+
+    useEffect(() => {
+        console.log(usageModel)
+        console.log(Object.keys(usageModel.models))
+        
+    }, [])
+
+    return (
+
+        <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None'}}>
+
+            {usageModel && (
+                <div>
+                    <table>
+
+                    <tr>
+                        <td>Model</td>
+                        <td>Input Tokens</td>
+                        <td>Output Tokens</td>
+                    </tr>
+
+                       {usageModel && usageModel.models && Object.keys(usageModel.models).map((key, index)=>(
+                        <tr>
+                      
+                            <td>{usageModel.models[key]["model"]}</td>
+                            <td>{usageModel.models[key]["inputs"]}</td>
+                            <td>{usageModel.models[key]["outputs"]}</td>
+                            
+
+                        </tr>
+
+                       ))}
+
+
+                    </table>
+                   
+
+
+                </div>
+            )}
+          
+
+                
+        </div>
+
+
+
+    )
+}
+
+
+
+export default UsageModel

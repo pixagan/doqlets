@@ -169,6 +169,8 @@ class DoqletsApp:
 
 
             self.vstore.create_get_collection(collection_name)
+
+            
             
 
             new_project = {
@@ -176,8 +178,6 @@ class DoqletsApp:
                 "_id": str(created_project.inserted_id),
             }
 
-
-            
 
             return {"project": new_project}
 
@@ -542,7 +542,7 @@ class DoqletsApp:
         @self.api.get("/api/chat/{project_id}")
         async def load_chat_history(project_id: str):
 
-            chats = self.db.load_documents("chat", {})
+            chats = self.db.load_documents("chat", {"project_id":project_id})
             for chat in chats:
                 chat["_id"] = str(chat["_id"])
 
@@ -589,7 +589,7 @@ class DoqletsApp:
         @self.api.get("/api/agents/{project_id}")
         async def get_agent_runs(project_id: str):
 
-            tasks = self.db.load_documents("task", {})
+            tasks = self.db.load_documents("task", {"project_id": project_id})
             for task in tasks:
                 task["_id"] = str(task["_id"])
             return {"tasks": tasks}
@@ -604,7 +604,16 @@ class DoqletsApp:
             return {"skills": skills}
 
 
-        #------------------------------------------------------------------
+        #------------------------------------------------------------------ Usage
+
+        @self.api.get("/api/usage/{project_id}")
+        async def load_usage(project_id: str):
+
+            usage = self.db.load_documents("usage", {"project_id":project_id})
+
+            return {"usage": usage}
+
+
 
     def run(self):
         uvicorn.run(self.api, host="0.0.0.0", port=6070)
