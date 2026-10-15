@@ -43,16 +43,25 @@ class DoqletsAgentManager:
 
     def create_agent(self, skill_instructions):
 
-        agent_role = "You are a Doqlets Agent that is tasked with completing a task based using the tools provided. Use the skill instructions added below to complete the task."
-        agent_instructions = skill_instructions
+        agent_role = "You are a Doqlets Agent that is tasked with completing a task based using the tools provided. Use any skill instructions provided below to complete the task."
+        
+        base_instructions = """Any skill instructions required are added below. Use them to guide you towards solving the task. If any instructions are not provided, see if the task is a typical RAG task. If so build the relevant context by extracting teh relevant info from teh database you are provided access to via the tools and respond with the relevant information.
+        If the task is comething else, try to logically see what setps you need to achieve the soltuion with the tools provided. If the task can be solved with the provided tools do so, if not, respond with a Task-Cannot-Be-Completed response.
+        """
+
+        agent_instructions = ""
+        if skill_instructions is not None:
+            agent_instructions = "Skill Instructions are : "+ skill_instructions
+        else:
+            agent_instructions = ""
 
         data_instruction = """You must only use the data available in the databases for the task.
-        You can use the tools provided to search and retrueve data. DO NOT MAKE UP ANY INFOMRATION.
+        You can use the tools provided to search and retrieve data. DO NOT MAKE UP ANY INFOMRATION.
         """
 
         response_format = """Respond in Markdown format unless otherwise specified by the user."""
         
-        agent_instructions = agent_instructions + data_instruction
+        agent_instructions = base_instructions + agent_instructions + data_instruction
 
         llm_config={
             "api_key":km['OPENAI_API_KEY'], 
@@ -99,7 +108,8 @@ class DoqletsAgentManager:
                 break
 
         if skill_file is None:
-            raise ValueError(f"Skill {selected_skill} not found")
+            print("Skill not found for ", selected_skill)
+            #raise ValueError(f"Skill {selected_skill} not found")
             return None
 
 
@@ -114,14 +124,20 @@ class DoqletsAgentManager:
     def run_task(self, skill, task, project_id, write_to_file=False):
 
         print("Loading Skill Instructions for ", skill)
-        skill_instructions = self.load_skill(skill)
+
+        skill_instructions = None
+
+        if skill is not None:
+            skill_instructions = self.load_skill(skill)
+        else:
+            skill_instructions = None
 
         print("Skill Instructions: ", skill_instructions)
 
         if skill_instructions is None:
             print("Skill Instructions not found for ", skill)
-            raise ValueError(f"Skill {skill} not found")
-            return None
+            #raise ValueError(f"Skill {skill} not found")
+            #return None
 
 
         print("Creating Agent for ", skill)

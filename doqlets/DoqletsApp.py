@@ -96,8 +96,7 @@ class DoqletsApp:
 
     def __init__(self):
 
-        self.store_flow    = None
-        self.retrieve_flow = None
+
 
         self.api =  FastAPI(
                                 title="Doqlets API for App",
@@ -120,6 +119,10 @@ class DoqletsApp:
         self.db = MongoNode("DoqletsDB", config={"MONGO_URI": self.km["MONGO_URI"], "MONGO_DB": self.km["MONGO_DB"]})
 
         self.vstore = ChromaNode("ChromaNode", config={"db_path": self.km["CHROMA_PATH"]})
+
+
+        #self.store_flow    = None
+        #self.retrieve_flow = None
 
 
         self.d2c_flow        = dataToCardsFlow
@@ -507,46 +510,7 @@ class DoqletsApp:
             return {"block": cblock_meta}
 
 
-       #--------------------Search  / RAG -------------------------------------------------
 
-
-        @self.api.post("/api/search/{project_id}")
-        async def search_pages(project_id:str, search_in:SearchInput):
-
-            query = search_in.query
-            search_response = self.search_flow.run({"query": query, "project_id": project_id})
-
-            search_results = search_response["outputs"]["MergeSearchResults|merge_search_results|merged_results"]
-            print("search_results ", search_results)
-
-            self.action_log.add_item("search", "Searching for relevant data from database", {})
-
-            return {"search_results": search_results}
-
-
-        @self.api.post("/api/chat/{project_id}")
-        async def chat_pages(project_id:str, search_in:SearchInput):
-
-            query = search_in.query
-            chat_response = self.chat_flow.run({"query": query, "project_id": project_id})
-            #print("search_results ", search_response)
-
-            answer = chat_response["outputs"]["AnswerQuery|answer_query|answer"]
-            print("chat answer ", answer)
-
-            chat_id = self.action_log.add_chat_item(query, answer)
-
-            return {"answer": answer}
-
-
-        @self.api.get("/api/chat/{project_id}")
-        async def load_chat_history(project_id: str):
-
-            chats = self.db.load_documents("chat", {"project_id":project_id})
-            for chat in chats:
-                chat["_id"] = str(chat["_id"])
-
-            return {"chats": chats}
 
 
         #--------------- Tasks -------------------------------------------
@@ -604,7 +568,7 @@ class DoqletsApp:
             return {"skills": skills}
 
 
-        #------------------------------------------------------------------ Usage
+        #---------------------------------- Usage -------------------
 
         @self.api.get("/api/usage/{project_id}")
         async def load_usage(project_id: str):
@@ -612,6 +576,48 @@ class DoqletsApp:
             usage = self.db.load_documents("usage", {"project_id":project_id})
 
             return {"usage": usage}
+
+
+
+       #--------------------Search  / RAG (now depreciated)-------------------------------------------------
+
+        @self.api.post("/api/search/{project_id}")
+        async def search_pages(project_id:str, search_in:SearchInput):
+
+            query = search_in.query
+            search_response = self.search_flow.run({"query": query, "project_id": project_id})
+
+            search_results = search_response["outputs"]["MergeSearchResults|merge_search_results|merged_results"]
+            print("search_results ", search_results)
+
+            self.action_log.add_item("search", "Searching for relevant data from database", {})
+
+            return {"search_results": search_results}
+
+
+        @self.api.post("/api/chat/{project_id}")
+        async def chat_pages(project_id:str, search_in:SearchInput):
+
+            query = search_in.query
+            chat_response = self.chat_flow.run({"query": query, "project_id": project_id})
+            #print("search_results ", search_response)
+
+            answer = chat_response["outputs"]["AnswerQuery|answer_query|answer"]
+            print("chat answer ", answer)
+
+            chat_id = self.action_log.add_chat_item(query, answer)
+
+            return {"answer": answer}
+
+
+        @self.api.get("/api/chat/{project_id}")
+        async def load_chat_history(project_id: str):
+
+            chats = self.db.load_documents("chat", {"project_id":project_id})
+            for chat in chats:
+                chat["_id"] = str(chat["_id"])
+
+            return {"chats": chats}
 
 
 

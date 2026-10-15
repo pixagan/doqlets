@@ -93,15 +93,15 @@ export const WikiScreen = ({match, history}) => {
                 <ListGroup.Item onClick={()=>setRightView("wiki")} active={rightView === "wiki"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Pages
                 </ListGroup.Item>
-                <ListGroup.Item onClick={()=>setRightView("chat")} active={rightView === "chat"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
+                {/* <ListGroup.Item onClick={()=>setRightView("chat")} active={rightView === "chat"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Chat
-                </ListGroup.Item>
+                </ListGroup.Item> */}
                 <ListGroup.Item onClick={()=>setRightView("agents")} active={rightView === "agents"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Agents
+                    Ask
                 </ListGroup.Item>
-                <ListGroup.Item onClick={()=>setRightView("usage")} active={rightView === "usage"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
+                {/* <ListGroup.Item onClick={()=>setRightView("usage")} active={rightView === "usage"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Usage
-                </ListGroup.Item>
+                </ListGroup.Item> */}
                
                
                
@@ -124,7 +124,7 @@ export const WikiScreen = ({match, history}) => {
         
 
 
-            {rightView === "chat" && (
+            {/* {rightView === "chat" && (
                 <div>
                     
                     <ListGroup horizontal>
@@ -147,7 +147,7 @@ export const WikiScreen = ({match, history}) => {
                    
 
                 </div>
-            )}
+            )} */}
 
 
             {rightView === "agents" && (
@@ -168,9 +168,9 @@ export const WikiScreen = ({match, history}) => {
             )}
 
 
-            {rightView == "usage" && (
+            {/* {rightView == "usage" && (
                 <UsageModel project_id={project_id} />
-            )}
+            )} */}
 
 
 
