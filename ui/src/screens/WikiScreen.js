@@ -46,6 +46,8 @@ export const WikiScreen = ({match, history}) => {
 
     const {project_id} = useParams();
 
+    const [project, setProject] = useState(null)
+
     const [pageTitle, setPageTitle] = useState('')
 
     const [sectionType, setSectionType] = useState("all") 
@@ -63,18 +65,19 @@ export const WikiScreen = ({match, history}) => {
     const [cards, setCards] = useState([])
 
 
-    
-
-
     const [chatView, setChatView] = useState("chat") //search, chat
 
     
+    const load_project = async () => {
+        const response = await axios.get(`/api/projects/${project_id}`)
+        setProject(response.data.project)
+    }
    
 
 
     useEffect(() => {
         
-     
+     load_project()
 
     }, [])
 
@@ -86,6 +89,10 @@ export const WikiScreen = ({match, history}) => {
          <Meta title={'Doqlets'} description={'Doqlets'}/>
 
          <ListGroup horizontal>
+
+               <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}}>
+                {project && project.name}
+               </ListGroup.Item>
                 
                 <ListGroup.Item onClick={()=>setRightView("docs")} active={rightView === "docs"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Docs

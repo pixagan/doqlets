@@ -26,9 +26,10 @@ class ActionLog:
         self.db =  MongoNode("DoqletsDB", config={"MONGO_URI": self.km["MONGO_URI"], "MONGO_DB": self.km["MONGO_DB"]})
 
 
-    def add_item(self, action_type, action_description, metadata=None):
+    def add_item(self, action_type, project_id, action_description, metadata=None):
 
         new_item = {
+            "project_id": project_id,
             "action_type": action_type,
             "action_description": action_description,
             "metadata": metadata
@@ -59,9 +60,10 @@ class ActionLog:
         return new_chat.inserted_id
 
 
-    def add_task_item(self, task, skill, agent_response): 
+    def add_task_item(self, project_id, task, skill, agent_response): 
 
         new_task = {
+            "project_id": project_id,
             "task": task,
             "skill": skill,
             "response": agent_response["output"],
@@ -70,7 +72,7 @@ class ActionLog:
 
         new_task = self.db.create_document("task", new_task)
 
-        self.add_item("task", "Task run with Agent", {"task_id": str(new_task.inserted_id), "skill": skill})
+        self.add_item("task", project_id, "Task run with Agent", {"task_id": str(new_task.inserted_id), "skill": skill})
 
         return new_task.inserted_id
 

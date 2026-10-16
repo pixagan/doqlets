@@ -173,8 +173,6 @@ class DoqletsApp:
 
             self.vstore.create_get_collection(collection_name)
 
-            
-            
 
             new_project = {
                 "name": project_create.name,
@@ -183,6 +181,14 @@ class DoqletsApp:
 
 
             return {"project": new_project}
+
+
+        @self.api.get("/api/projects/{project_id}")
+        async def load_projects_id(project_id: str):
+
+            cproject = self.db.load_document_id("projects", project_id)
+            cproject["_id"] = str(cproject["_id"])
+            return {"project": cproject}
 
 
     #--------------------Documents -------------------------------------------------
@@ -511,8 +517,6 @@ class DoqletsApp:
 
 
 
-
-
         #--------------- Tasks -------------------------------------------
 
         @self.api.post("/api/agents/{project_id}")
@@ -538,7 +542,7 @@ class DoqletsApp:
             #print("search_results ", search_response)
             print("task_response ", task_response)
 
-            task_id = self.action_log.add_task_item(task_description, skill, task_response["outputs"])
+            task_id = self.action_log.add_task_item(project_id, task_description, skill, task_response["outputs"])
 
 
             task_response["task"] = task_description
