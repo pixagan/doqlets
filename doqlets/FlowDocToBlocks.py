@@ -50,11 +50,20 @@ llm_config_merge={
 }
 
 
+llm_model = "gpt-5.1"
+llm_model_merge = "gpt-5.5"
+
+
 db = Mongo("DoqletsDB", config={"MONGO_URI": km["MONGO_URI"], "MONGO_DB": km["MONGO_DB"]})
 
 
 
 
+# LLM Init
+relevantpage_llm = LLM('FinRelevantPage', config=llm_config)
+findrelevantblocks_llm = LLM('FindRelevantBlocks', config=llm_config)
+
+merge_blocks_llm = LLM('MergeBlocks_LLM', config=llm_config_merge)
 
 
 def extract_doc_search_criteron(cards):
@@ -147,10 +156,6 @@ loadRelevantBlocksNode.set_function("load_relevant_blocks", load_relevant_blocks
 
 
 
-relevantpage_llm = LLM('FinRelevantPage', config=llm_config)
-findrelevantblocks_llm = LLM('FindRelevantBlocks', config=llm_config)
-
-
 def card_block_matching(cards, blocks):
     print("Check for new additions : ", cards)
     print("Blocks : ", blocks)
@@ -241,7 +246,7 @@ cardBlockMatchingNode.set_function("card_block_matching", card_block_matching, {
 
 
 
-merge_blocks_llm = LLM('MergeBlocks_LLM', config=llm_config_merge)
+
 
 def merge_blocks(cards, card_dict, merge_requests):
     print("Merge blocks : ", merge_requests, len(merge_requests))
@@ -267,10 +272,13 @@ def merge_blocks(cards, card_dict, merge_requests):
                 
             block_id = req["block"]
             cblock = db.load_document_id("blocks", block_id)
+            block_rules = db.load_document("block_rules", {"block_id": block_id})
+            block_rules["_id"] = str(block_rules["_id"])
 
             merge_inputs = {
                 "cards":rel_cards,
-                "block":cblock
+                "block":cblock,
+                "block_rules":block_rules
             }
 
             agent_response = block_update_agent.run_agent(merge_inputs)

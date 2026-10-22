@@ -37,6 +37,8 @@ const AgentCard = ({ project_id }) => {
         },
     ])
 
+    const [selectedModel, setSelectedModel] = useState('gpt-5.1')
+
     const [selectedSkill, setSelectedSkill] = useState('')
 
     const [searchResults, setSearchResults] = useState([])
@@ -67,7 +69,7 @@ const AgentCard = ({ project_id }) => {
         console.log("selectedSkill ", selectedSkill)
         //console.log("selectedSkill['name'] ", selectedSkill["name"])
         console.log("query ", query)
-        const response = await axios.post(`/api/agents/${project_id}`, { skill: selectedSkill, task: query }, config)
+        const response = await axios.post(`/api/agents/${project_id}`, { skill: selectedSkill, task: query, llm_model: selectedModel }, config)
         const answer = response.data.task_response
 
         console.log("response ", answer.toString())
@@ -110,13 +112,16 @@ const AgentCard = ({ project_id }) => {
 
 
             <InputGroup>
-              <Form.Select aria-label="Default select example" value={selectedSkill} onChange={(e)=>setSelectedSkill(e.target.value)}>
+              <Form.Select aria-label="Default select example" value={selectedSkill} onChange={(e)=>setSelectedSkill(e.target.value)} style={{width:'10%'}}>
                 <option value="">Select a skill</option>
                 {skillList.map((skill, index)=>(
                   <option key={index} value={skill.name}>{skill.name}</option>
                 ))}
               </Form.Select>
-              <Button variant="primary" style={{backgroundColor:'blue', borderRadius:'10px'}} onClick={()=>chatRequest()} style={{textAlign:'left'}}>Run</Button>
+              <Form.Select aria-label="LLM Model" value={selectedModel} onChange={(e)=>setSelectedModel(e.target.value)} style={{width:'10%'}}>
+                <option value="gpt-5.1">gpt-5.1</option>
+              </Form.Select>
+              <Button variant="primary" style={{backgroundColor:'blue', borderRadius:'10px'}} onClick={()=>chatRequest()}>Run</Button>
             </InputGroup>
 
             <br />

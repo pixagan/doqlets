@@ -24,14 +24,16 @@ const AddBlock = ({ project_id, page_id, addBlockRequest }) => {
 
     const dispatch = useDispatch()
 
-    const textareaRef = useRef(null)
+    const textareaRef1 = useRef(null)
+    const textareaRef2 = useRef(null)
+    const textareaRef3 = useRef(null)
 
     const [blockType, setBlockType] = useState('')
     const [blockTitle, setBlockTitle] = useState('')
     const [blockDefinition, setBlockDefinition] = useState('')
     const [blockRules, setBlockRules] = useState('')
     const [blocktypes, setBlockTypes] = useState(["paragraph", "table", "list"])
-
+    const [blockContext, setBlockContext] = useState('')
    
     const createBlock = async() => {
 
@@ -44,8 +46,9 @@ const AddBlock = ({ project_id, page_id, addBlockRequest }) => {
         var newBlock = {
             "title":blockTitle,
             "block_type":blockType,
+            "block_description":blockDefinition,
             "rules":blockRules,
-            "context":blockDefinition,
+            "context":blockContext,
         }
 
         const response = await axios.post(`/api/pages/blocks/${project_id}/${page_id}`, newBlock, config)
@@ -55,12 +58,23 @@ const AddBlock = ({ project_id, page_id, addBlockRequest }) => {
     }
 
     
-    const resizeTextarea = () => {
-        const textarea = textareaRef.current
+    const resizeTextarea1 = () => {
+        const textarea = textareaRef1.current
         textarea.style.height = 'auto'
         textarea.style.height = textarea.scrollHeight + 'px'
     }
 
+    const resizeTextarea2 = () => {
+        const textarea = textareaRef2.current
+        textarea.style.height = 'auto'
+        textarea.style.height = textarea.scrollHeight + 'px'
+    }
+
+    const resizeTextarea3 = () => {
+        const textarea = textareaRef3.current
+        textarea.style.height = 'auto'
+        textarea.style.height = textarea.scrollHeight + 'px'
+    }
 
     useEffect(() => {
         
@@ -84,10 +98,12 @@ const AddBlock = ({ project_id, page_id, addBlockRequest }) => {
                 ))}
               </Form.Select>
 
-
-                <Form.Control as="textarea" rows={5} placeholder="Block Definition : What the block should contain" value={blockDefinition} onChange={(e) => setBlockDefinition(e.target.value)} onInput={resizeTextarea} ref={textareaRef} style={{marginBottom:"10px"}}/>
                 
-                <Form.Control as="textarea" rows={5} placeholder="Block Rules : Formatting requests, etc." value={blockRules} onChange={(e) => setBlockRules(e.target.value)} onInput={resizeTextarea} ref={textareaRef} style={{marginBottom:"10px"}}/>
+                <Form.Control as="textarea" rows={5} placeholder="Block Instructions : Formatting requests, etc." value={blockRules} onChange={(e) => setBlockRules(e.target.value)} onInput={resizeTextarea1} ref={textareaRef1} style={{marginBottom:"10px"}}/>
+
+                <Form.Control as="textarea" rows={5} placeholder="What is the block about?(Optional)" value={blockDefinition} onChange={(e) => setBlockDefinition(e.target.value)} onInput={resizeTextarea2} ref={textareaRef2} style={{marginBottom:"10px"}}/>
+
+                <Form.Control as="textarea" rows={5} placeholder="Any context that might be required (Optional)" value={blockContext} onChange={(e) => setBlockContext(e.target.value)} onInput={resizeTextarea3} ref={textareaRef3} style={{marginBottom:"10px"}}/>
 
                 <Button variant="primary" onClick={()=>createBlock()}>Create Block</Button>
 

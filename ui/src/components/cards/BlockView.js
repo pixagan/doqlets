@@ -21,11 +21,11 @@ import axios from 'axios'
 
 import { MarkdownView } from '../cards/MarkdownView'
 
-import { Settings, Workflow } from 'lucide-react'
+import { Settings, Workflow, LayersArrowDown } from 'lucide-react'
 
 
 
-const BlockView = ({ page_id, card, blockSettingsView}) => {
+const BlockView = ({ project_id, page_id, card, blockSettingsView}) => {
 
     const dispatch = useDispatch()
 
@@ -49,6 +49,21 @@ const BlockView = ({ page_id, card, blockSettingsView}) => {
         blockSettingsView(card._id, card.title)
     }
 
+    const requestBlockIndex = async() => {
+
+        console.log("Indexing Block ", card.title)
+        var config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+        const response = await axios.put(`/api/pages/blocks/index/${project_id}/${card._id}`, {}, config)
+        console.log("response ", response)
+        card.content = response.data.block.content
+
+        
+    }
+
     const textareaRef = useRef(null)
 
 
@@ -67,6 +82,8 @@ const BlockView = ({ page_id, card, blockSettingsView}) => {
                 <Card.Header style={{border:'None', textAlign:'left', fontWeight:'bold'}}>
                     {card.title} | 
                     <Badge bg='light' onClick={()=>toggleBlockSettingsView()}> <Settings /> </Badge>
+                     <Badge bg='light' onClick={()=>requestBlockIndex()}><LayersArrowDown size={28} />
+                      </Badge>
                     <Badge bg='light' onClick={()=>toggleViewSettings()}> <Workflow /> </Badge>
                 </Card.Header>
                  <Card.Body style={{border:'None', textAlign:'left'}}>
@@ -78,6 +95,8 @@ const BlockView = ({ page_id, card, blockSettingsView}) => {
                     <div>
                         <InputGroup>
                             <Button style={{paddingTop:'2px', paddingBottom:'2px'}} onClick={()=>updateSettingsView('tags')}>Tags</Button>
+                           
+                           
                             <Button style={{paddingTop:'2px', paddingBottom:'2px'}} onClick={()=>updateSettingsView('connections')}>Connections</Button>
                         </InputGroup>
 

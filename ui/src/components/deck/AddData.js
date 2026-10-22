@@ -126,7 +126,7 @@ const AddData = ({ project_id, callBackAddData }) => {
                     
                     <Form.Control type="text" placeholder="Enter title (required)" value={title} onChange={(e) => setTitle(e.target.value)} style={{marginBottom:'10px', marginTop:'10px'}}/>
                     <Form.Control as="textarea" rows={20} placeholder="Enter text content" value={text} onChange={(e) => setText(e.target.value)} onInput={resizeTextarea} ref={textareaRef}/>
-                    <Button variant="primary" onClick={()=>uploadText()}>Upload</Button>
+                    <Button style={{backgroundColor:'blue', borderRadius:'10px'}} variant="primary" onClick={()=>uploadText()}>Upload</Button>
                 </div>
             )}
 
@@ -143,7 +143,7 @@ const AddData = ({ project_id, callBackAddData }) => {
                     onChange={handleFileChange}
                     className="mb-2"
                 />
-                 <Button variant="primary" onClick={uploadDocument}>Upload</Button>
+                 <Button variant="primary" style={{backgroundColor:'blue', borderRadius:'10px'}} onClick={uploadDocument}>Upload</Button>
                 
                 </InputGroup>
               

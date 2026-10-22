@@ -24,13 +24,15 @@ skillist = [
         "file":"ReportGenerator.md",
     },
     {
-        "name": "RAG",
-        "description": "Retrieve relevant data from the database",
-        "file":"RAG.md",
-    },
-    {
         "name": "QuizGenerator",
         "description": "Generate a quiz based on the input data",
         "file":"QuizGenerator.md",
     }
 ]
+
+
+# {
+#     "name": "RAG",
+#     "description": "Retrieve relevant data from the database",
+#     "file":"RAG.md",
+# },

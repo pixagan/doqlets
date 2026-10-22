@@ -54,6 +54,7 @@ from FlowAddData import dataToCardsFlow
 
 from FlowDocToBlocks import addToPagesFlow
 from FlowDocToCards import docToCardsFlow
+from FlowInitBlockContent import dataToBlocksFlow
 
 #Search and Chat
 from FlowSearch import searchFlow
@@ -61,6 +62,8 @@ from FlowChat import chatFlow
 
 #Agents
 from DoqletsAgentManager import DoqletsAgentManager
+
+from CostModel import UsageModel
 
 
 class ProjectCreate(BaseModel):
@@ -84,10 +87,12 @@ class SearchInput(BaseModel):
 class AgentInput(BaseModel):
     skill: str
     task: str
+    llm_model: str
 
 class BlockCreate(BaseModel):
     title: str
     block_type: str
+    block_description: str
     rules: str
     context: str
 
@@ -140,6 +145,8 @@ class DoqletsApp:
         self.action_log = ActionLog()
         self.agent_manager = DoqletsAgentManager()
 
+        self.usage_model = UsageModel()
+
 
         self.setup_routes()
 
@@ -165,13 +172,25 @@ class DoqletsApp:
         @self.api.post("/api/projects")
         async def create_project(project_create:ProjectCreate):
 
-            project_name = project_create.name.strip().lower()
+            project_name = project_create.name.strip().lower().replace(" ", "_")
             collection_name = "dq" + "_" + project_name
 
             created_project = self.db.create_document("projects", {"name": project_create.name, "collection_name":collection_name})
 
 
             self.vstore.create_get_collection(collection_name)
+
+            newCost = {
+                "project_id": str(created_project.inserted_id),
+                "usage":{
+                    "gpt-5.1":{
+                        "input_tokens": 0,
+                        "output_tokens": 0,
+                    }
+                }
+            }
+
+            self.db.create_document("cost", newCost)
 
 
             new_project = {
@@ -221,9 +240,9 @@ class DoqletsApp:
             return {"document": document}
 
 
-        @self.api.get("/api/documents/cards/{project_id}/{page_uid}")
-        async def load_page_cards(project_id: str, page_uid: str):
-            cards = self.db.load_documents("cards", {"page":page_uid})
+        @self.api.get("/api/documents/cards/{project_id}/{doc_id}")
+        async def load_page_cards(project_id: str, doc_id: str):
+            cards = self.db.load_documents("cards", {"doc_id":doc_id})
             for card in cards:  
                 card["_id"] = str(card["_id"])
 
@@ -367,26 +386,25 @@ class DoqletsApp:
 
 
 
-        @self.api.put("/api/documents/file/{project_id}")
-        async def update_doc(project_id:str, file: UploadFile = File(...)):
+        # @self.api.put("/api/documents/file/{project_id}")
+        # async def update_doc(project_id:str, file: UploadFile = File(...)):
 
-            file_content = await file.read()
-            #self.store_flow.run({"file": file_content})
+        #     file_content = await file.read()
 
-            data = self.data_loader.load_pdf(file_content)
+        #     data = self.data_loader.load_pdf(file_content)
 
-            new_document = {
-                "project_id":project_id,
-                "title": title,
-                "source": "file",   #db, file, cloud, web.
-                "doc_id": str(created_document.inserted_id),
-            }
+        #     new_document = {
+        #         "project_id":project_id,
+        #         "title": title,
+        #         "source": "file",   #db, file, cloud, web.
+        #         "doc_id": str(created_document.inserted_id),
+        #     }
 
-            created_doc = self.db.create_document("documents", new_document)
+        #     created_doc = self.db.create_document("documents", new_document)
 
-            flow_response = self.doc_loader_flow.run({"data": data})
+        #     flow_response = self.doc_loader_flow.run({"data": data})
             
-            return {"message": "PDF stored successfully"}
+        #     return {"message": "PDF stored successfully"}
 
         
 
@@ -461,8 +479,9 @@ class DoqletsApp:
             block_type = block_create.block_type
             rules = block_create.rules
             context = block_create.context
+            block_description = block_create.block_description
 
-            print("New Block ", title, block_type, rules, context)
+            print("New Block ", title, block_type, rules, context, block_description)
 
             newBlock = {
                 "project_id":project_id,
@@ -485,6 +504,7 @@ class DoqletsApp:
                 "type":block_type,
                 "instructions":rules,
                 "context": context,
+                "block_description": block_description,
             }
 
             created_rules = self.db.create_document("block_rules", newBlockRules)
@@ -496,12 +516,12 @@ class DoqletsApp:
 
 
 
-        @self.api.put("/api/pages/blocks/{project_id}/{page_uid}/block_id")
-        async def update_block(project_id: str, page_uid: str):
+        # @self.api.put("/api/pages/blocks/{project_id}/{page_uid}/block_id")
+        # async def update_block(project_id: str, page_uid: str):
 
-            cblock = self.db.load_document_id("blocks", block_id)
+        #     cblock = self.db.load_document_id("blocks", block_id)
 
-            return {"block": cblock}
+        #     return {"block": cblock}
 
 
         @self.api.get("/api/pages/blocks/{project_id}/{block_id}")
@@ -516,6 +536,37 @@ class DoqletsApp:
             return {"block": cblock_meta}
 
 
+        @self.api.put("/api/pages/blocks/index/{project_id}/{block_id}")
+        async def index_block_data(project_id: str, block_id: str):
+
+            inputs = {
+                "block_id": block_id,
+            }
+
+            flow_res = dataToBlocksFlow.run(inputs)
+
+            merge_requests = flow_res["outputs"]["MergeBlocks|merge_blocks|merge_summary"]
+
+            cblock = self.db.load_document_id("blocks", block_id)
+
+            cblock["_id"] = str(cblock["_id"])
+
+            return {"block": cblock}
+
+
+
+        @self.api.delete("/api/pages/blocks/{project_id}/{block_id}")
+        async def delete_block(project_id: str, block_id: str):
+
+            block_rules = self.db.load_documents({"block_rules", "block_id":block_id})
+
+            self.db.delete_document_id("block_rules",str(block_rules["_id"]))
+
+            self.db.delete_document_id("blocks", str(block_id))
+
+            return {"status":"Completed"}
+
+
 
         #--------------- Tasks -------------------------------------------
 
@@ -524,6 +575,7 @@ class DoqletsApp:
 
             task_description  = task_in.task
             skill = task_in.skill
+            llm_model = task_in.llm_model
 
             print("task_description ", task_description)
             print("skill ", skill)
@@ -533,7 +585,8 @@ class DoqletsApp:
                 "vector_store_parameters":{
                     "collection_name":"doqlets",
                     "n_results":"5"
-                }
+                },
+                "llm_model":llm_model
             }
 
             print("running task ", skill, task_request)
@@ -543,6 +596,14 @@ class DoqletsApp:
             print("task_response ", task_response)
 
             task_id = self.action_log.add_task_item(project_id, task_description, skill, task_response["outputs"])
+
+           
+            usage = task_response["outputs"]["usage"]
+
+            #self.usage_model.update_usage(project_id, )
+
+            print("usage ", usage)
+
 
 
             task_response["task"] = task_description

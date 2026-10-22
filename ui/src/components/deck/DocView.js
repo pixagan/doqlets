@@ -18,6 +18,7 @@ import {Alert} from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import { Row, Col, Image, ListGroup, Card, Button, Form, Table, InputGroup, Badge } from 'react-bootstrap'
 import axios from 'axios'
+import ContentCard from '../cards/ContentCard'
 
 
 const DocView = ({ project_id, doc_id }) => {
@@ -26,10 +27,14 @@ const DocView = ({ project_id, doc_id }) => {
 
     const textareaRef = useRef(null)
 
+    const [viewMode, setViewMode] = useState('doc') ///doc, cards
+
     const [selectedSection, setSelectedSection] = useState('')
     const [doc, setDoc] = useState(null)
 
     const [sections, setSections] = useState([ ])
+
+    const [cards, setCards] = useState(null)
 
 
     const loadDoc = async () => {
@@ -47,6 +52,13 @@ const DocView = ({ project_id, doc_id }) => {
     }
 
 
+    const loadCards = async () => {
+        if (!doc_id) return
+        const response = await axios.get(`/api/documents/cards/${project_id}/${doc_id}`)
+        console.log("response ", response)
+        setCards(response.data.cards)
+    }
+
     useEffect(() => {
 
         loadDoc()
@@ -57,10 +69,25 @@ const DocView = ({ project_id, doc_id }) => {
 
         <div style={{backgroundColor:'white', padding:'1px', minHeight:'95vh', maxHeight:'95vh', overflow:'scroll', border:'None'}}>
 
-            {doc && (
+
+            {/* <ListGroup horizontal>
+                <ListGroup.Item onClick={()=>setViewMode('doc')} active={viewMode === 'doc'} style={{paddingTop:'5px', paddingBottom:'5px'}}>Doc</ListGroup.Item>
+                <ListGroup.Item onClick={()=>setViewMode('cards')} active={viewMode === 'cards'} style={{paddingTop:'5px', paddingBottom:'5px'}}>Cards</ListGroup.Item>
+            </ListGroup> */}
+
+            {viewMode === 'doc' && doc && (
                 <div>
                     <p className='h5'>{doc.title}</p>
-                    <p style={{textAlign:'left'}}>{doc.data}</p>
+                        <p style={{textAlign:'left'}}>{doc.data}</p>
+                    </div>
+            )}
+            
+            {viewMode === 'cards' && cards && (
+                <div>
+                    <p className='h5'>Cards</p>
+                    {cards && cards.map((card, index)=>(
+                        <ContentCard card={card} />
+                    ))}
                 </div>
             )}
           

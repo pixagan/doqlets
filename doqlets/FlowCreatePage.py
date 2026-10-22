@@ -30,6 +30,8 @@ llm_config={
     "model":"gpt-5.1", 
 }
 
+llm_model = "gpt-5.1"
+
 db = MongoNode("DoqletsDB", config={"MONGO_URI": km["MONGO_URI"], "MONGO_DB": km["MONGO_DB"]})
 
 
@@ -69,7 +71,7 @@ def create_page_schema_llm(page_name, page_description, page_rules, required_blo
     }
   ]
 
-  response = relevantpage_llm.call_llm(messages)
+  response = relevantpage_llm.call_llm(messages, [], llm_model)
   updated_page_schema = response['message'].content
   updated_page_schema_json = json.loads(updated_page_schema)
   return updated_page_schema_json

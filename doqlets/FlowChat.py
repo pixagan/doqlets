@@ -27,7 +27,7 @@ llm_config={
     "model":"gpt-5.1", 
 }
 
-
+llm_model = 'gpt-5.1'
 
 vector_store = ChromaNode("ChromaNode", config={"db_path": km["CHROMA_PATH"]})
 
@@ -137,7 +137,7 @@ def answer_query(query: str, context: list):
             "content": "Context: " + context_string
         }
     ]
-    output = query_responder_llm.call_llm(messages)
+    output = query_responder_llm.call_llm(messages, [], llm_model)
     answer = output['message'].content
     return {
         "answer": answer

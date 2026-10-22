@@ -112,7 +112,7 @@ class OpenAINode(Node):
         print(f"Setting up node {self.name}")
 
     #def call_llm(self, inputs):
-    def call_llm(self, messages, tools=[]):
+    def call_llm(self, messages, tools=[], model='gpt-5.1'):
 
         #print("Messages : ", messages)
         #print("Tools : ", tools)
@@ -122,8 +122,9 @@ class OpenAINode(Node):
         if(self.instructions):
             messages.insert(0, {"role":"developer", "content":self.instructions})
 
+
         response = self.client.chat.completions.create(
-                model=self.model,
+                model=model,
                 messages = messages,
                 tools = tools,
                 tool_choice = "auto"

@@ -1,45 +1,54 @@
-# {
-#     "models":{
-#         "GPT-5.1":{
-#             "model":"GPT-5.1",
-#             "inputs":"200",
-#             "outputs":"10"
-#         }
-#     }
-# }
+from nodes.MongoNode import MongoNode
+from laeyerz.utils.KeyManager import KeyManager
 
-
-class CostModel:
+class UsageModel:
 
     def __init__(self):
-        print("Cost Model")
+        print("Usage Model")
+
+        self.km            = KeyManager()
+
+        self.db = MongoNode("DoqletsDB", config={"MONGO_URI": self.km["MONGO_URI"], "MONGO_DB": self.km["MONGO_DB"]})
+        
         self.cost_table = {}
 
-    def load_cost_table(self):
-        print("Load Cost Table")
 
-    def estimate_cost(self, model, token_count):
-        print("Estimate Cost")
-
-        model_costs = self.cost_table[model]
-
-        input_cost = model_costs["input"]
-        output_cost = model_costs["output"]
-
-        token_run_cost = token_count["input"]*model_costs["input"] + token_count["output"]*model_costs["output"]
-
-        return token_run_cost
+    def add(self, model, input_tokens, output_tokens):
+        self.cost_table[model] = {
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+        }
 
 
-    def update_cost_model(self):
-        print("Estimate Cost Model")
+    def update_usage(self, project_id, model, tokens):
+      
+        cost_model = self.db.load_documents("cost", {"project_id": project_id})
 
-        cost_model = self.db.load_document(
-            "cost_model":{}
-        )
+        if cost_model is not None:
 
-    def get_costs(self):
+            if cost_model["usage"][model] is not None:
+                cost_model["usage"][model]["input_tokens"] += tokens["input_tokens"]
+                cost_model["usage"][model]["output_tokens"] += tokens["output_tokens"]
+            else:
+                cost_model["usage"][model] = {
+                    "input_tokens": tokens["input_tokens"],
+                    "output_tokens": tokens["output_tokens"],
+                }
+
+            self.db.update_document_id("cost", str(cost_model["_id"]), cost_model)
+
+        else:
+            print("Cost model not found for project ", project_id)
+
+        
+
+    def get_costs(self, project_id):
         print("Load Cost Estimate")
 
+        cost_model = self.db.load_documents("cost", {"project_id": project_id})
 
+        cost_model["_id"] = str(cost_model["_id"])
+
+        return cost_model
+        
 

@@ -40,6 +40,8 @@ llm_config={
     "model":"gpt-5.1", 
 }
 
+llm_model = "gpt-5.1"
+
 
 db = Mongo("DoqletsDB", config={"MONGO_URI": km["MONGO_URI"], "MONGO_DB": km["MONGO_DB"]})
 vector_store = ChromaNode("ChromaNode", config={"db_path": km["CHROMA_PATH"]})
@@ -95,7 +97,7 @@ def data_to_cards(data):
         }
     ]
 
-    response = cleanup_llm.call_llm(messages)
+    response = cleanup_llm.call_llm(messages, [], llm_model)
 
     content = response['message'].content
 
@@ -217,7 +219,7 @@ def tag_cards(cards, pages):
         }
     ]
 
-    response = classify_llm.call_llm(messages)
+    response = classify_llm.call_llm(messages, [], llm_model)
 
     content = response['message'].content
 

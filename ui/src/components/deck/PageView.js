@@ -115,7 +115,7 @@ const PageView = ({ project_id, page_id, page_title }) => {
             </ListGroup>
 
             <Row>
-                <Col style={{"overflow-x":'scroll', minHeight:'95vh'}}>
+                <Col style={{"overflow-x":'scroll', "overflow-y":'scroll', minHeight:'95vh', maxHeight:'99vh'}}>
 
                 <hr />
 

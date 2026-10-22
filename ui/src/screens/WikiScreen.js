@@ -58,8 +58,7 @@ export const WikiScreen = ({match, history}) => {
     const [chatHistory, setChatHistory] = useState([])
     const [docPages, setDocPages] = useState([])
 
-    //const [project_id, setProjectId] = useState(null)
-    
+  
     
 
     const [cards, setCards] = useState([])
@@ -90,7 +89,7 @@ export const WikiScreen = ({match, history}) => {
 
          <ListGroup horizontal>
 
-               <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px'}}>
+               <ListGroup.Item style={{paddingTop:'5px', paddingBottom:'5px', backgroundColor:'#f0f0f0', fontWeight:'bold', color:'blue'}}>
                 {project && project.name}
                </ListGroup.Item>
                 
@@ -100,15 +99,11 @@ export const WikiScreen = ({match, history}) => {
                 <ListGroup.Item onClick={()=>setRightView("wiki")} active={rightView === "wiki"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Pages
                 </ListGroup.Item>
-                {/* <ListGroup.Item onClick={()=>setRightView("chat")} active={rightView === "chat"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Chat
-                </ListGroup.Item> */}
+                
                 <ListGroup.Item onClick={()=>setRightView("agents")} active={rightView === "agents"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
                     Ask
                 </ListGroup.Item>
-                {/* <ListGroup.Item onClick={()=>setRightView("usage")} active={rightView === "usage"} style={{paddingTop:'5px', paddingBottom:'5px'}}>
-                    Usage
-                </ListGroup.Item> */}
+              
                
                
                
@@ -128,33 +123,7 @@ export const WikiScreen = ({match, history}) => {
             )}
 
 
-        
-
-
-            {/* {rightView === "chat" && (
-                <div>
-                    
-                    <ListGroup horizontal>
-                        <ListGroup.Item onClick={()=>setChatView("chat")} active={chatView === "chat"} style={{paddingTop:'5px', paddingBottom:'5px'}}>Chat</ListGroup.Item>
-                        <ListGroup.Item onClick={()=>setChatView("search")} active={chatView === "search"} style={{paddingTop:'5px', paddingBottom:'5px'}}>Search</ListGroup.Item>
-                        
-                    </ListGroup>
-
-                    {chatView === "search" && (
-                        <SearchCard project_id={project_id} />
-                    )}
-
-                    {chatView === "chat" && (
-                        <ChatCard project_id={project_id} />
-                    )}
-
-                
-
-                  
-                   
-
-                </div>
-            )} */}
+    
 
 
             {rightView === "agents" && (
@@ -173,13 +142,6 @@ export const WikiScreen = ({match, history}) => {
                 <DocsMain project_id={project_id} />
               
             )}
-
-
-            {/* {rightView == "usage" && (
-                <UsageModel project_id={project_id} />
-            )} */}
-
-
 
 
            

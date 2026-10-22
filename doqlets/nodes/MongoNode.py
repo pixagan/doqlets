@@ -107,6 +107,7 @@ class MongoNode(Node):
 
     def update_document_id(self, collection_name, document_id, new_values):
         """Update documents matching the query"""
+        new_values["updated_at"] = datetime.now()
         query = {"_id": ObjectId(document_id)}
         update_operation = { '$set' : 
             new_values

@@ -41,7 +41,7 @@ class DoqletsAgentManager:
         print("Setting up Doqlets Agent Manager")
 
 
-    def create_agent(self, skill_instructions):
+    def create_agent(self, model, skill_instructions):
 
         agent_role = "You are a Doqlets Agent that is tasked with completing a task based using the tools provided. Use any skill instructions provided below to complete the task."
         
@@ -65,7 +65,7 @@ class DoqletsAgentManager:
 
         llm_config={
             "api_key":km['OPENAI_API_KEY'], 
-            "model":"gpt-5.1"
+            "model":model
         }
 
 
@@ -125,6 +125,11 @@ class DoqletsAgentManager:
 
         print("Loading Skill Instructions for ", skill)
 
+        llm_model = task.get("llm_model")
+
+        if llm_model is None:
+            llm_model = "gpt-5.1"
+
         skill_instructions = None
 
         if skill is not None:
@@ -141,11 +146,12 @@ class DoqletsAgentManager:
 
 
         print("Creating Agent for ", skill)
-        agent = self.create_agent(skill_instructions)
+        agent = self.create_agent(llm_model,skill_instructions)
 
         print("Running Task for ", skill)
         task_response = agent.run_agent(task=task, write_to_file=write_to_file)
         print("Task Response for ", skill, task_response)
+
 
         return task_response
 
